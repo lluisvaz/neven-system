@@ -7,31 +7,21 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  Banknote,
-  BriefcaseBusiness,
-  Building2,
-  CheckCircle2,
-  CircleDollarSign,
-  Plus,
-  Save,
-  Trash2,
-  TrendingUp,
-  Users,
-  Wallet,
+  Banknote, BriefcaseBusiness, Building2, CheckCircle2,
+  CircleDollarSign, Plus, RefreshCw, Save, Trash2,
+  TrendingUp, Users, Wallet, AlertCircle, Zap,
 } from "lucide-react";
+import { useFinancialData, fmtBRL } from "@/lib/financial-data";
 
-type Partner = {
-  id: number;
-  name: string;
-  share: number;
-};
+// Re-export local reference to gateway meta without importing from client-config
+// to avoid circular deps. Colors are duplicated intentionally for self-containment.
+const GW = {
+  stripe: { label: "Stripe", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/30", border: "border-violet-200 dark:border-violet-800/50" },
+  asaas: { label: "Asaas", color: "text-sky-600 dark:text-sky-400", bg: "bg-sky-50 dark:bg-sky-950/30", border: "border-sky-200 dark:border-sky-800/50" },
+} as const;
 
-type Expense = {
-  id: number;
-  name: string;
-  share: number;
-  type: string;
-};
+type Partner = { id: number; name: string; share: number };
+type Expense = { id: number; name: string; share: number; type: string };
 
 const initialPartners: Partner[] = [
   { id: 1, name: "Sócio fundador", share: 70 },
@@ -49,22 +39,13 @@ const initialExpenses: Expense[] = [
 ];
 
 const storageKey = "gestorpro-financial-distribution";
-
-const currency = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-  maximumFractionDigits: 0,
-});
-
-const normalizeNumber = (value: string) => {
-  const parsed = Number(value.replace(/\D/g, ""));
-  return Number.isFinite(parsed) ? parsed : 0;
-};
-
-const clampPercent = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
+const clampPercent = (v: number) => Math.max(0, Math.min(100, Math.round(v)));
 
 export function DistributionPage() {
+  const { data: fin, loading, error, refresh } = useFinancialData();
+
   const [monthlyRevenue, setMonthlyRevenue] = useState(220000);
+  const [useGatewayBalance, setUseGatewayBalance] = useState(true);
   const [companyCashPercent, setCompanyCashPercent] = useState(30);
   const [partnersPercent, setPartnersPercent] = useState(20);
   const [expensesPercent, setExpensesPercent] = useState(50);
@@ -72,19 +53,26 @@ export function DistributionPage() {
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
   const [savedAt, setSavedAt] = useState("Ainda não salvo");
 
+  // When live/mock gateway data arrives, auto-populate the base revenue
+  useEffect(() => {
+    if (fin && useGatewayBalance) {
+      setMonthlyRevenue(Math.round(fin.totalBalanceBRL));
+    }
+  }, [fin, useGatewayBalance]);
+
+  // Load saved distribution settings from localStorage
   useEffect(() => {
     const saved = window.localStorage.getItem(storageKey);
     if (!saved) return;
-
     try {
       const parsed = JSON.parse(saved);
-      setMonthlyRevenue(parsed.monthlyRevenue ?? 220000);
       setCompanyCashPercent(parsed.companyCashPercent ?? 30);
       setPartnersPercent(parsed.partnersPercent ?? 20);
       setExpensesPercent(parsed.expensesPercent ?? 50);
       setPartners(parsed.partners?.length ? parsed.partners : initialPartners);
       setExpenses(parsed.expenses?.length ? parsed.expenses : initialExpenses);
       setSavedAt(parsed.savedAt ?? "Configuração carregada");
+      if (parsed.useGatewayBalance !== undefined) setUseGatewayBalance(parsed.useGatewayBalance);
     } catch {
       window.localStorage.removeItem(storageKey);
     }
@@ -93,78 +81,34 @@ export function DistributionPage() {
   const totals = useMemo(() => {
     const allocatedPercent = companyCashPercent + partnersPercent + expensesPercent;
     const unallocatedPercent = 100 - allocatedPercent;
-    const companyCashValue = (monthlyRevenue * companyCashPercent) / 100;
-    const partnersValue = (monthlyRevenue * partnersPercent) / 100;
-    const expensesValue = (monthlyRevenue * expensesPercent) / 100;
-    const unallocatedValue = (monthlyRevenue * unallocatedPercent) / 100;
-    const partnersShareTotal = partners.reduce((sum, partner) => sum + partner.share, 0);
-    const expensesShareTotal = expenses.reduce((sum, expense) => sum + expense.share, 0);
-
     return {
       allocatedPercent,
       unallocatedPercent,
-      companyCashValue,
-      partnersValue,
-      expensesValue,
-      unallocatedValue,
-      partnersShareTotal,
-      expensesShareTotal,
+      companyCashValue: (monthlyRevenue * companyCashPercent) / 100,
+      partnersValue: (monthlyRevenue * partnersPercent) / 100,
+      expensesValue: (monthlyRevenue * expensesPercent) / 100,
+      unallocatedValue: (monthlyRevenue * unallocatedPercent) / 100,
+      partnersShareTotal: partners.reduce((s, p) => s + p.share, 0),
+      expensesShareTotal: expenses.reduce((s, e) => s + e.share, 0),
     };
   }, [companyCashPercent, expenses, expensesPercent, monthlyRevenue, partners, partnersPercent]);
 
   const status = totals.allocatedPercent === 100 ? "Fechado em 100%" : totals.allocatedPercent > 100 ? "Acima de 100%" : "Falta alocar";
 
-  const updatePartner = (id: number, field: keyof Partner, value: string | number) => {
-    setPartners((current) =>
-      current.map((partner) =>
-        partner.id === id
-          ? { ...partner, [field]: field === "share" ? clampPercent(Number(value)) : String(value) }
-          : partner,
-      ),
-    );
-  };
-
-  const updateExpense = (id: number, field: keyof Expense, value: string | number) => {
-    setExpenses((current) =>
-      current.map((expense) =>
-        expense.id === id
-          ? { ...expense, [field]: field === "share" ? clampPercent(Number(value)) : String(value) }
-          : expense,
-      ),
-    );
-  };
-
-  const addPartner = () => {
-    setPartners((current) => [...current, { id: Date.now(), name: "Novo sócio", share: 0 }]);
-  };
-
-  const addExpense = () => {
-    setExpenses((current) => [...current, { id: Date.now(), name: "Nova despesa", share: 0, type: "Operação" }]);
-  };
-
   const saveSettings = () => {
-    const savedAtLabel = new Date().toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    window.localStorage.setItem(
-      storageKey,
-      JSON.stringify({
-        monthlyRevenue,
-        companyCashPercent,
-        partnersPercent,
-        expensesPercent,
-        partners,
-        expenses,
-        savedAt: savedAtLabel,
-      }),
-    );
+    const savedAtLabel = new Date().toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    window.localStorage.setItem(storageKey, JSON.stringify({
+      companyCashPercent, partnersPercent, expensesPercent,
+      partners, expenses, savedAt: savedAtLabel, useGatewayBalance,
+    }));
     setSavedAt(savedAtLabel);
   };
+
+  const updatePartner = (id: number, field: keyof Partner, value: string | number) =>
+    setPartners(cur => cur.map(p => p.id === id ? { ...p, [field]: field === "share" ? clampPercent(Number(value)) : String(value) } : p));
+
+  const updateExpense = (id: number, field: keyof Expense, value: string | number) =>
+    setExpenses(cur => cur.map(e => e.id === id ? { ...e, [field]: field === "share" ? clampPercent(Number(value)) : String(value) } : e));
 
   return (
     <div className="space-y-6">
@@ -180,59 +124,139 @@ export function DistributionPage() {
             {status}: {totals.allocatedPercent}%
           </Badge>
           <Button className="rounded-sm" onClick={saveSettings}>
-            <Save className="w-4 h-4 mr-2" />
-            Salvar configuração
+            <Save className="w-4 h-4 mr-2" />Salvar configuração
           </Button>
         </div>
       </header>
 
+      {/* ── GATEWAY BALANCE PANEL ─────────────────────────────────────── */}
+      <div className="border border-border rounded-sm overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 bg-muted/20 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Zap className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs uppercase tracking-widest font-semibold text-muted-foreground">
+              Saldo dos Gateways — Receita Base
+            </span>
+            {!fin?.isLiveData && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded border border-amber-300 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:border-amber-700 dark:text-amber-400 font-mono">
+                dados simulados
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+              <input type="checkbox" checked={useGatewayBalance} onChange={e => {
+                setUseGatewayBalance(e.target.checked);
+                if (e.target.checked && fin) setMonthlyRevenue(Math.round(fin.totalBalanceBRL));
+              }} className="rounded" />
+              Usar saldo real como base
+            </label>
+            <Button variant="ghost" size="icon" className="w-7 h-7 rounded-sm" onClick={refresh} disabled={loading}>
+              <RefreshCw className={`w-3.5 h-3.5 text-muted-foreground ${loading ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
+        </div>
+
+        {error && (
+          <div className="flex items-center gap-2 px-4 py-3 text-sm text-destructive bg-destructive/5">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>Erro ao carregar saldo: {error}. Usando valor manual.</span>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
+          {[
+            {
+              gw: "asaas" as const,
+              label: "Asaas",
+              value: fin?.asaas.balanceBRL ?? 0,
+              sub: "Saldo disponível em R$",
+              extra: `Atualizado: ${fin ? new Date(fin.asaas.lastSyncedAt).toLocaleTimeString("pt-BR") : "—"}`,
+            },
+            {
+              gw: "stripe" as const,
+              label: "Stripe",
+              value: fin?.stripe.availableBRL ?? 0,
+              sub: `${fin?.stripe.originalCurrency.toUpperCase() ?? "USD"} ${(fin?.stripe.originalAvailable ?? 0).toLocaleString("en-US")} × ${fin?.stripe.exchangeRate.toFixed(2) ?? "—"} = BRL`,
+              extra: `Pendente: ${fmtBRL(fin?.stripe.pendingBRL ?? 0)}`,
+            },
+            {
+              gw: null,
+              label: "Total (BRL)",
+              value: fin?.totalBalanceBRL ?? 0,
+              sub: "Stripe + Asaas convertidos em R$",
+              extra: useGatewayBalance ? "✓ Sendo usado como receita base" : "Receita base ajustada manualmente",
+            },
+          ].map(({ gw, label, value, sub, extra }) => {
+            const g = gw ? GW[gw] : null;
+            return (
+              <div key={label} className={`p-4 ${g ? `${g.bg}` : "bg-muted/10"}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  {g ? (
+                    <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border ${g.color} ${g.bg} ${g.border}`}>{label}</span>
+                  ) : (
+                    <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border border-border bg-background text-foreground">TOTAL</span>
+                  )}
+                </div>
+                <p className={`text-2xl font-mono font-semibold ${loading ? "opacity-40" : ""} ${g ? g.color : "text-foreground"}`}>
+                  {fmtBRL(value)}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-1">{sub}</p>
+                <p className={`text-[10px] mt-0.5 font-medium ${gw === null && useGatewayBalance ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>{extra}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── SUMMARY CARDS ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
         <Card className="rounded-sm">
           <CardContent className="p-4">
-            <div className="flex items-center text-muted-foreground gap-2">
-              <TrendingUp className="w-4 h-4" />
-              <span className="text-[10px] uppercase tracking-wider font-medium">Receita Base</span>
+            <div className="flex items-center text-muted-foreground gap-2 justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                <span className="text-[10px] uppercase tracking-wider font-medium">Receita Base</span>
+              </div>
+              {useGatewayBalance && (
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">auto</span>
+              )}
             </div>
             <Input
               value={monthlyRevenue.toLocaleString("pt-BR")}
-              onChange={(event) => setMonthlyRevenue(normalizeNumber(event.target.value))}
+              onChange={e => {
+                setUseGatewayBalance(false);
+                const n = Number(e.target.value.replace(/\D/g, ""));
+                if (Number.isFinite(n)) setMonthlyRevenue(n);
+              }}
               className="mt-3 rounded-sm font-mono text-xl h-11"
             />
-            <p className="text-xs text-muted-foreground mt-2">Base mensal usada para simular a distribuição.</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              {useGatewayBalance
+                ? "Alimentado pelo saldo da sua conta Stripe + Asaas."
+                : "Valor manual. Marque 'Usar saldo real' para sincronizar."}
+            </p>
           </CardContent>
         </Card>
-        <Card className="rounded-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center text-muted-foreground gap-2">
-              <Building2 className="w-4 h-4" />
-              <span className="text-[10px] uppercase tracking-wider font-medium">Caixa da empresa</span>
-            </div>
-            <div className="text-2xl font-mono mt-3">{currency.format(totals.companyCashValue)}</div>
-            <p className="text-xs text-muted-foreground mt-2">{companyCashPercent}% para reserva, capital de giro e crescimento.</p>
-          </CardContent>
-        </Card>
-        <Card className="rounded-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center text-muted-foreground gap-2">
-              <Users className="w-4 h-4" />
-              <span className="text-[10px] uppercase tracking-wider font-medium">Bolso dos sócios</span>
-            </div>
-            <div className="text-2xl font-mono mt-3">{currency.format(totals.partnersValue)}</div>
-            <p className="text-xs text-muted-foreground mt-2">{partnersPercent}% dividido entre sócios conforme regras abaixo.</p>
-          </CardContent>
-        </Card>
-        <Card className="rounded-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center text-muted-foreground gap-2">
-              <BriefcaseBusiness className="w-4 h-4" />
-              <span className="text-[10px] uppercase tracking-wider font-medium">Despesas</span>
-            </div>
-            <div className="text-2xl font-mono mt-3">{currency.format(totals.expensesValue)}</div>
-            <p className="text-xs text-muted-foreground mt-2">{expensesPercent}% para funcionários, ferramentas, impostos e operação.</p>
-          </CardContent>
-        </Card>
+        {[
+          { icon: Building2, label: "Caixa da empresa", value: totals.companyCashValue, pct: companyCashPercent, desc: "Reserva, capital de giro e crescimento." },
+          { icon: Users, label: "Bolso dos sócios", value: totals.partnersValue, pct: partnersPercent, desc: "Pró-labore e distribuição." },
+          { icon: BriefcaseBusiness, label: "Despesas", value: totals.expensesValue, pct: expensesPercent, desc: "Folha, ferramentas, impostos e operação." },
+        ].map(({ icon: Icon, label, value, pct, desc }) => (
+          <Card key={label} className="rounded-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center text-muted-foreground gap-2">
+                <Icon className="w-4 h-4" />
+                <span className="text-[10px] uppercase tracking-wider font-medium">{label}</span>
+              </div>
+              <div className="text-2xl font-mono mt-3">{fmtBRL(value)}</div>
+              <p className="text-xs text-muted-foreground mt-2">{pct}% · {desc}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
+      {/* ── DISTRIBUTION RULE + MONTHLY SUMMARY ───────────────────────── */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
         <Card className="xl:col-span-5 rounded-sm">
           <CardHeader className="pb-2">
@@ -240,27 +264,9 @@ export function DistributionPage() {
           </CardHeader>
           <CardContent className="p-4 space-y-6">
             {[
-              {
-                label: "Caixa da empresa",
-                value: companyCashPercent,
-                setValue: setCompanyCashPercent,
-                description: "Reserva, capital de giro, reinvestimento, segurança e crescimento.",
-                icon: Building2,
-              },
-              {
-                label: "Retirada dos sócios",
-                value: partnersPercent,
-                setValue: setPartnersPercent,
-                description: "Pró-labore, distribuição planejada e pagamento para sócios.",
-                icon: Wallet,
-              },
-              {
-                label: "Despesas da operação",
-                value: expensesPercent,
-                setValue: setExpensesPercent,
-                description: "Folha, assinaturas, fornecedores, impostos, infraestrutura e recorrências.",
-                icon: BriefcaseBusiness,
-              },
+              { label: "Caixa da empresa", value: companyCashPercent, setValue: setCompanyCashPercent, icon: Building2, desc: "Reserva, capital de giro, reinvestimento, segurança e crescimento." },
+              { label: "Retirada dos sócios", value: partnersPercent, setValue: setPartnersPercent, icon: Wallet, desc: "Pró-labore, distribuição planejada e pagamento para sócios." },
+              { label: "Despesas da operação", value: expensesPercent, setValue: setExpensesPercent, icon: BriefcaseBusiness, desc: "Folha, assinaturas, fornecedores, impostos, infraestrutura e recorrências." },
             ].map((item) => (
               <div key={item.label} className="space-y-3">
                 <div className="flex items-start justify-between gap-3">
@@ -270,20 +276,15 @@ export function DistributionPage() {
                     </div>
                     <div>
                       <Label className="text-sm font-medium">{item.label}</Label>
-                      <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      value={item.value}
-                      onChange={(event) => item.setValue(clampPercent(Number(event.target.value)))}
-                      className="w-20 rounded-sm font-mono text-right"
-                    />
+                    <Input type="number" value={item.value} onChange={e => item.setValue(clampPercent(Number(e.target.value)))} className="w-20 rounded-sm font-mono text-right" />
                     <span className="text-sm font-mono text-muted-foreground">%</span>
                   </div>
                 </div>
-                <Slider value={[item.value]} min={0} max={100} step={1} onValueChange={(value) => item.setValue(value[0])} />
+                <Slider value={[item.value]} min={0} max={100} step={1} onValueChange={v => item.setValue(v[0])} />
               </div>
             ))}
 
@@ -293,11 +294,9 @@ export function DistributionPage() {
                   {totals.allocatedPercent === 100 ? <CheckCircle2 className="w-4 h-4 text-accent" /> : <CircleDollarSign className="w-4 h-4 text-muted-foreground" />}
                   <span className="text-sm font-medium">Saldo da regra</span>
                 </div>
-                <span className="font-mono text-sm">{totals.unallocatedPercent}% · {currency.format(totals.unallocatedValue)}</span>
+                <span className="font-mono text-sm">{totals.unallocatedPercent}% · {fmtBRL(totals.unallocatedValue)}</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                O ideal é fechar em 100%. Se passar de 100%, a empresa está prometendo mais dinheiro do que a receita permite.
-              </p>
+              <p className="text-xs text-muted-foreground mt-2">O ideal é fechar em 100%. Se passar de 100%, a empresa está prometendo mais dinheiro do que a receita permite.</p>
             </div>
           </CardContent>
         </Card>
@@ -310,9 +309,9 @@ export function DistributionPage() {
           <CardContent className="p-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
-                ["Receita analisada", currency.format(monthlyRevenue), "100%"],
-                ["Total alocado", currency.format(totals.companyCashValue + totals.partnersValue + totals.expensesValue), `${totals.allocatedPercent}%`],
-                ["Saldo restante", currency.format(totals.unallocatedValue), `${totals.unallocatedPercent}%`],
+                ["Receita analisada", fmtBRL(monthlyRevenue), "100%"],
+                ["Total alocado", fmtBRL(totals.companyCashValue + totals.partnersValue + totals.expensesValue), `${totals.allocatedPercent}%`],
+                ["Saldo restante", fmtBRL(totals.unallocatedValue), `${totals.unallocatedPercent}%`],
               ].map(([label, value, percent]) => (
                 <div key={label} className="border border-border rounded-sm p-4">
                   <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
@@ -330,7 +329,7 @@ export function DistributionPage() {
                 <div key={String(label)} className="space-y-2">
                   <div className="flex items-center justify-between gap-3 text-sm">
                     <span>{label}</span>
-                    <span className="font-mono">{percent}% · {currency.format(Number(value))}</span>
+                    <span className="font-mono">{percent}% · {fmtBRL(Number(value))}</span>
                   </div>
                   <div className="h-3 rounded-sm bg-muted overflow-hidden">
                     <div className={`h-full ${color}`} style={{ width: `${Math.min(100, Number(percent))}%` }} />
@@ -342,6 +341,7 @@ export function DistributionPage() {
         </Card>
       </div>
 
+      {/* ── PARTNERS + EXPENSES ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <Card className="rounded-sm">
           <CardHeader className="pb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -349,9 +349,8 @@ export function DistributionPage() {
               <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">Divisão entre sócios</CardTitle>
               <p className="text-xs text-muted-foreground mt-1">Define como o valor destinado aos sócios será repartido.</p>
             </div>
-            <Button variant="outline" size="sm" className="rounded-sm w-fit" onClick={addPartner}>
-              <Plus className="w-4 h-4 mr-2" />
-              Sócio
+            <Button variant="outline" size="sm" className="rounded-sm w-fit" onClick={() => setPartners(c => [...c, { id: Date.now(), name: "Novo sócio", share: 0 }])}>
+              <Plus className="w-4 h-4 mr-2" />Sócio
             </Button>
           </CardHeader>
           <CardContent className="p-0">
@@ -361,24 +360,22 @@ export function DistributionPage() {
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="h-8 text-xs">Sócio</TableHead>
                     <TableHead className="h-8 text-xs w-28">%</TableHead>
-                    <TableHead className="h-8 text-xs text-right">Valor</TableHead>
+                    <TableHead className="h-8 text-xs text-right">Valor (BRL)</TableHead>
                     <TableHead className="h-8 text-xs w-12" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {partners.map((partner) => (
-                    <TableRow key={partner.id} className="hover:bg-muted/50">
+                  {partners.map(p => (
+                    <TableRow key={p.id} className="hover:bg-muted/50">
                       <TableCell className="py-3 min-w-[180px]">
-                        <Input value={partner.name} onChange={(event) => updatePartner(partner.id, "name", event.target.value)} className="rounded-sm" />
+                        <Input value={p.name} onChange={e => updatePartner(p.id, "name", e.target.value)} className="rounded-sm" />
                       </TableCell>
                       <TableCell className="py-3">
-                        <Input type="number" value={partner.share} onChange={(event) => updatePartner(partner.id, "share", event.target.value)} className="rounded-sm font-mono text-right" />
+                        <Input type="number" value={p.share} onChange={e => updatePartner(p.id, "share", e.target.value)} className="rounded-sm font-mono text-right" />
                       </TableCell>
-                      <TableCell className="py-3 text-right font-mono">
-                        {currency.format((totals.partnersValue * partner.share) / 100)}
-                      </TableCell>
+                      <TableCell className="py-3 text-right font-mono">{fmtBRL((totals.partnersValue * p.share) / 100)}</TableCell>
                       <TableCell className="py-3 text-right">
-                        <Button variant="ghost" size="icon" className="rounded-sm h-8 w-8" onClick={() => setPartners((current) => current.filter((item) => item.id !== partner.id))}>
+                        <Button variant="ghost" size="icon" className="rounded-sm h-8 w-8" onClick={() => setPartners(c => c.filter(x => x.id !== p.id))}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
@@ -400,9 +397,8 @@ export function DistributionPage() {
               <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">Categorias de despesas</CardTitle>
               <p className="text-xs text-muted-foreground mt-1">Detalhe tudo que consome o orçamento de despesas.</p>
             </div>
-            <Button variant="outline" size="sm" className="rounded-sm w-fit" onClick={addExpense}>
-              <Plus className="w-4 h-4 mr-2" />
-              Despesa
+            <Button variant="outline" size="sm" className="rounded-sm w-fit" onClick={() => setExpenses(c => [...c, { id: Date.now(), name: "Nova despesa", share: 0, type: "Operação" }])}>
+              <Plus className="w-4 h-4 mr-2" />Despesa
             </Button>
           </CardHeader>
           <CardContent className="p-0">
@@ -413,27 +409,25 @@ export function DistributionPage() {
                     <TableHead className="h-8 text-xs">Despesa</TableHead>
                     <TableHead className="h-8 text-xs">Tipo</TableHead>
                     <TableHead className="h-8 text-xs w-24">%</TableHead>
-                    <TableHead className="h-8 text-xs text-right">Valor</TableHead>
+                    <TableHead className="h-8 text-xs text-right">Valor (BRL)</TableHead>
                     <TableHead className="h-8 text-xs w-12" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {expenses.map((expense) => (
-                    <TableRow key={expense.id} className="hover:bg-muted/50">
+                  {expenses.map(e => (
+                    <TableRow key={e.id} className="hover:bg-muted/50">
                       <TableCell className="py-3 min-w-[190px]">
-                        <Input value={expense.name} onChange={(event) => updateExpense(expense.id, "name", event.target.value)} className="rounded-sm" />
+                        <Input value={e.name} onChange={ev => updateExpense(e.id, "name", ev.target.value)} className="rounded-sm" />
                       </TableCell>
                       <TableCell className="py-3 min-w-[130px]">
-                        <Input value={expense.type} onChange={(event) => updateExpense(expense.id, "type", event.target.value)} className="rounded-sm" />
+                        <Input value={e.type} onChange={ev => updateExpense(e.id, "type", ev.target.value)} className="rounded-sm" />
                       </TableCell>
                       <TableCell className="py-3">
-                        <Input type="number" value={expense.share} onChange={(event) => updateExpense(expense.id, "share", event.target.value)} className="rounded-sm font-mono text-right" />
+                        <Input type="number" value={e.share} onChange={ev => updateExpense(e.id, "share", ev.target.value)} className="rounded-sm font-mono text-right" />
                       </TableCell>
-                      <TableCell className="py-3 text-right font-mono">
-                        {currency.format((totals.expensesValue * expense.share) / 100)}
-                      </TableCell>
+                      <TableCell className="py-3 text-right font-mono">{fmtBRL((totals.expensesValue * e.share) / 100)}</TableCell>
                       <TableCell className="py-3 text-right">
-                        <Button variant="ghost" size="icon" className="rounded-sm h-8 w-8" onClick={() => setExpenses((current) => current.filter((item) => item.id !== expense.id))}>
+                        <Button variant="ghost" size="icon" className="rounded-sm h-8 w-8" onClick={() => setExpenses(c => c.filter(x => x.id !== e.id))}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
@@ -457,7 +451,7 @@ export function DistributionPage() {
         <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div className="flex gap-3">
             <Banknote className="w-5 h-5 text-accent flex-shrink-0" />
-            <p>Use a receita mensal prevista para simular quanto dinheiro deve ser separado antes de qualquer retirada.</p>
+            <p>A receita base é puxada automaticamente do saldo da sua conta Stripe + Asaas, convertido em R$. Você pode ajustar manualmente a qualquer momento.</p>
           </div>
           <div className="flex gap-3">
             <Users className="w-5 h-5 text-accent flex-shrink-0" />
