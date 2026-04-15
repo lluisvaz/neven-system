@@ -1,12 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Users, Puzzle, Settings2, Shield } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 const settingsNav = [
   { name: "Empresa", href: "/settings", icon: Building2 },
@@ -17,48 +14,156 @@ const settingsNav = [
 ];
 
 export function SettingsCompanyPage() {
-  return (
-    <div className="space-y-6">
-      <div><h1 className="text-3xl font-bold tracking-tight">Configurações</h1><p className="text-muted-foreground mt-1">Configurações gerais da plataforma</p></div>
+  const [location] = useLocation();
 
-      <div className="flex gap-2 border-b pb-4">
-        {settingsNav.map(nav => (
-          <Link key={nav.name} href={nav.href}><Button variant={nav.href === "/settings" ? "default" : "ghost"} size="sm"><nav.icon className="w-4 h-4 mr-2" />{nav.name}</Button></Link>
-        ))}
+  return (
+    <div className="space-y-8 max-w-4xl">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Configurações</h1>
+        <p className="text-sm font-mono text-muted-foreground mt-1">Gerencie as preferências da sua conta</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader><CardTitle>Dados da Empresa</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2"><Label>Nome da Empresa</Label><Input defaultValue="GestorPro Tecnologia Ltda" data-testid="input-company-name" /></div>
-            <div className="space-y-2"><Label>CNPJ</Label><Input defaultValue="12.345.678/0001-90" /></div>
-            <div className="space-y-2"><Label>Endereço</Label><Input defaultValue="Rua Augusta, 1500, Sala 301 - Consolação, São Paulo - SP" /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>CEP</Label><Input defaultValue="01304-001" /></div>
-              <div className="space-y-2"><Label>Telefone</Label><Input defaultValue="+55 11 3000-0000" /></div>
-            </div>
-            <Button size="sm">Salvar Alterações</Button>
-          </CardContent>
-        </Card>
+      <div className="flex gap-6 border-b border-border pb-px overflow-x-auto hide-scrollbar">
+        {settingsNav.map(nav => {
+          const isActive = location === nav.href;
+          return (
+            <Link key={nav.name} href={nav.href}>
+              <div className={`flex items-center gap-2 pb-3 text-sm font-medium uppercase tracking-wider border-b-2 transition-colors cursor-pointer whitespace-nowrap
+                ${isActive ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
+                <nav.icon className="w-4 h-4" />
+                {nav.name}
+              </div>
+            </Link>
+          );
+        })}
+      </div>
 
-        <Card>
-          <CardHeader><CardTitle>Personalização</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2"><Label>Logo da Empresa</Label><div className="flex items-center gap-4"><div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-xs">Logo</div><Button variant="outline" size="sm">Upload</Button></div></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Cor Primária</Label><div className="flex items-center gap-2"><div className="w-8 h-8 rounded-lg bg-primary border" /><Input defaultValue="#1a1a2e" /></div></div>
-              <div className="space-y-2"><Label>Cor Secundária</Label><div className="flex items-center gap-2"><div className="w-8 h-8 rounded-lg bg-blue-500 border" /><Input defaultValue="#0066ff" /></div></div>
+      <div className="space-y-10">
+        {/* Identidade Visual */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-1">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Identidade Visual</h2>
+            <p className="text-xs text-muted-foreground mt-1">Logomarca e cores da sua empresa no portal do cliente.</p>
+          </div>
+          <div className="md:col-span-2 space-y-6">
+            <div className="space-y-3">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Logotipo</Label>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-sm bg-muted flex items-center justify-center border border-border border-dashed">
+                  <span className="text-[10px] font-mono text-muted-foreground uppercase">Logo</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="rounded-sm h-8 text-xs">Alterar</Button>
+                    <Button variant="ghost" size="sm" className="rounded-sm h-8 text-xs text-destructive hover:text-destructive">Remover</Button>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">Recomendado: 256x256px, PNG com fundo transparente.</p>
+                </div>
+              </div>
             </div>
-            <Separator />
-            <div className="space-y-2"><Label>Domínio do Portal do Cliente</Label><Input defaultValue="cliente.gestorpro.com.br" /></div>
+            
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Fuso Horário</Label><Select defaultValue="brt"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="brt">Brasília (BRT -03:00)</SelectItem><SelectItem value="amt">Manaus (AMT -04:00)</SelectItem></SelectContent></Select></div>
-              <div className="space-y-2"><Label>Moeda Padrão</Label><Select defaultValue="brl"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="brl">Real (BRL)</SelectItem><SelectItem value="usd">Dólar (USD)</SelectItem></SelectContent></Select></div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Cor Primária</Label>
+                <div className="flex gap-2 items-center">
+                  <div className="w-8 h-8 rounded-sm border border-border bg-[#1a1a2e]" />
+                  <Input defaultValue="#1a1a2e" className="font-mono text-sm rounded-sm" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Cor Secundária</Label>
+                <div className="flex gap-2 items-center">
+                  <div className="w-8 h-8 rounded-sm border border-border bg-[#0066ff]" />
+                  <Input defaultValue="#0066ff" className="font-mono text-sm rounded-sm" />
+                </div>
+              </div>
             </div>
-            <Button size="sm">Salvar</Button>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
+
+        <div className="h-px bg-border w-full" />
+
+        {/* Dados Cadastrais */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-1">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Dados Cadastrais</h2>
+            <p className="text-xs text-muted-foreground mt-1">Informações legais e de faturamento da sua empresa.</p>
+          </div>
+          <div className="md:col-span-2 space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Razão Social / Nome da Empresa</Label>
+              <Input defaultValue="GestorPro Tecnologia Ltda" className="rounded-sm" data-testid="input-company-name" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">CNPJ / CPF</Label>
+                <Input defaultValue="12.345.678/0001-90" className="rounded-sm font-mono" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Telefone Principal</Label>
+                <Input defaultValue="+55 11 3000-0000" className="rounded-sm font-mono" />
+              </div>
+            </div>
+            <div className="space-y-2 pt-2">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Endereço Completo</Label>
+              <Input defaultValue="Rua Augusta, 1500, Sala 301 - Consolação" className="rounded-sm" />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2 col-span-1">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">CEP</Label>
+                <Input defaultValue="01304-001" className="rounded-sm font-mono" />
+              </div>
+              <div className="space-y-2 col-span-1">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Cidade</Label>
+                <Input defaultValue="São Paulo" className="rounded-sm" />
+              </div>
+              <div className="space-y-2 col-span-1">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Estado</Label>
+                <Input defaultValue="SP" className="rounded-sm" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="h-px bg-border w-full" />
+
+        {/* Localização */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-1">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Localização</h2>
+            <p className="text-xs text-muted-foreground mt-1">Configurações regionais e formatos.</p>
+          </div>
+          <div className="md:col-span-2 grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Fuso Horário</Label>
+              <Select defaultValue="brt">
+                <SelectTrigger className="rounded-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="brt">Brasília (BRT -03:00)</SelectItem>
+                  <SelectItem value="amt">Manaus (AMT -04:00)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Moeda Padrão</Label>
+              <Select defaultValue="brl">
+                <SelectTrigger className="rounded-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="brl">Real (BRL)</SelectItem>
+                  <SelectItem value="usd">Dólar (USD)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </section>
+
+        <div className="flex justify-end pt-4">
+          <Button className="rounded-sm px-8 bg-foreground hover:bg-foreground/90">Salvar Alterações</Button>
+        </div>
       </div>
     </div>
   );

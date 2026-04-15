@@ -1,11 +1,10 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, CreditCard, Eye } from "lucide-react";
+import { Download, Eye, FileText, ArrowDownToLine } from "lucide-react";
 
 const invoices = [
-  { id: "FAT-2026-0041", date: "01/04/2026", due: "15/04/2026", value: "R$ 15.500,00", status: "Pago", method: "PIX", nf: "NF 8842" },
+  { id: "FAT-2026-0041", date: "01/04/2026", due: "15/04/2026", value: "R$ 15.500,00", status: "A Vencer", method: "PIX", nf: "NF 8842" },
   { id: "FAT-2026-0038", date: "01/03/2026", due: "15/03/2026", value: "R$ 15.500,00", status: "Pago", method: "Cartão", nf: "NF 8721" },
   { id: "FAT-2026-0035", date: "01/02/2026", due: "15/02/2026", value: "R$ 15.500,00", status: "Pago", method: "PIX", nf: "NF 8603" },
   { id: "FAT-2026-0032", date: "01/01/2026", due: "15/01/2026", value: "R$ 12.000,00", status: "Pago", method: "Boleto", nf: "NF 8490" },
@@ -15,33 +14,67 @@ const invoices = [
 
 export function PortalInvoicesPage() {
   return (
-    <div className="space-y-6">
-      <div><h1 className="text-2xl font-bold tracking-tight">Minhas Faturas</h1><p className="text-muted-foreground mt-1">Histórico de cobranças e pagamentos</p></div>
+    <div className="space-y-8 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Faturas</h1>
+          <p className="text-sm font-mono text-muted-foreground mt-1">Histórico de cobranças e pagamentos</p>
+        </div>
+      </div>
 
-      <Card><CardContent className="p-0">
+      <div className="border border-border rounded-sm overflow-hidden bg-card">
         <Table>
-          <TableHeader><TableRow><TableHead>Fatura</TableHead><TableHead>Emissão</TableHead><TableHead>Vencimento</TableHead><TableHead>Valor</TableHead><TableHead>Método</TableHead><TableHead>NF</TableHead><TableHead>Status</TableHead><TableHead></TableHead></TableRow></TableHeader>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-32">Fatura</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Emissão / Vencimento</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Valor</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Método</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Nota Fiscal</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-center">Status</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-24"></TableHead>
+            </TableRow>
+          </TableHeader>
           <TableBody>
             {invoices.map(inv => (
-              <TableRow key={inv.id}>
-                <TableCell className="font-mono text-sm">{inv.id}</TableCell>
-                <TableCell className="text-sm">{inv.date}</TableCell>
-                <TableCell className="text-sm">{inv.due}</TableCell>
-                <TableCell className="text-sm font-medium">{inv.value}</TableCell>
-                <TableCell className="text-sm">{inv.method}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{inv.nf}</TableCell>
-                <TableCell><Badge variant="default">{inv.status}</Badge></TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon"><Eye className="w-4 h-4" /></Button>
-                    <Button variant="ghost" size="icon"><Download className="w-4 h-4" /></Button>
+              <TableRow key={inv.id} className={`hover:bg-muted/30 transition-colors group ${inv.status === 'Pago' ? 'opacity-80' : ''}`}>
+                <TableCell className="font-mono text-sm py-4 text-muted-foreground">{inv.id}</TableCell>
+                <TableCell className="py-4">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm font-mono text-muted-foreground">E: {inv.date}</span>
+                    <span className="text-sm font-mono font-medium">V: {inv.due}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-sm font-mono font-medium py-4 text-right">{inv.value}</TableCell>
+                <TableCell className="text-sm py-4 text-muted-foreground">{inv.method}</TableCell>
+                <TableCell className="py-4">
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors w-fit">
+                    <FileText className="w-3.5 h-3.5" />
+                    <span className="font-mono">{inv.nf}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="py-4 text-center">
+                  <Badge variant={inv.status === 'Pago' ? 'default' : 'secondary'} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
+                    {inv.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="py-4 text-right">
+                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {inv.status !== 'Pago' && (
+                      <Button variant="secondary" size="sm" className="h-8 rounded-sm text-xs px-3">
+                        Pagar
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="w-8 h-8 rounded-sm" title="Baixar Boleto/Fatura">
+                      <ArrowDownToLine className="w-4 h-4 text-muted-foreground" />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </CardContent></Card>
+      </div>
     </div>
   );
 }

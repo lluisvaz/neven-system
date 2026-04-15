@@ -1,96 +1,89 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Filter, Download, DollarSign, AlertTriangle, TrendingUp, Clock } from "lucide-react";
+import { Plus, Search, Filter, Download } from "lucide-react";
 
 const summaryCards = [
-  { title: "Total a Receber", value: "R$ 248.500,00", icon: DollarSign, color: "text-blue-500" },
-  { title: "Vencido", value: "R$ 32.400,00", icon: AlertTriangle, color: "text-red-500" },
-  { title: "Recebido (Abril)", value: "R$ 156.200,00", icon: TrendingUp, color: "text-emerald-500" },
-  { title: "Taxa Inadimplência", value: "4.8%", icon: Clock, color: "text-amber-500" },
+  { title: "A Receber", value: "R$ 248.500", highlight: false },
+  { title: "Vencido", value: "R$ 32.400", highlight: true },
+  { title: "Recebido (Mês)", value: "R$ 156.200", highlight: false },
+  { title: "Inadimplência", value: "4.8%", highlight: false },
 ];
 
 const receivables = [
-  { id: "FAT-2026-0041", client: "Tech Solutions Ltda", description: "Plano Enterprise - Abril/2026", grossValue: "R$ 8.500,00", discount: "R$ 0,00", netValue: "R$ 8.500,00", issued: "01/04/2026", due: "15/04/2026", paid: "12/04/2026", status: "Pago", method: "PIX", stripe: true },
-  { id: "FAT-2026-0042", client: "Nexus Digital", description: "Módulo Analytics - Abril/2026", grossValue: "R$ 6.800,00", discount: "R$ 340,00", netValue: "R$ 6.460,00", issued: "01/04/2026", due: "20/04/2026", paid: "-", status: "Pendente", method: "Boleto", stripe: false },
-  { id: "FAT-2026-0038", client: "Innovare Consultoria", description: "Consultoria Setup - Parcela 2/4", grossValue: "R$ 2.100,00", discount: "R$ 0,00", netValue: "R$ 2.100,00", issued: "15/03/2026", due: "10/04/2026", paid: "-", status: "Vencido", method: "Boleto", stripe: false },
-  { id: "FAT-2026-0043", client: "Criativa Design", description: "Plano Pro - Abril/2026", grossValue: "R$ 5.200,00", discount: "R$ 0,00", netValue: "R$ 5.200,00", issued: "01/04/2026", due: "15/04/2026", paid: "14/04/2026", status: "Pago", method: "Cartão", stripe: true },
-  { id: "FAT-2026-0035", client: "Verde Energia", description: "Plano Básico - Março/2026", grossValue: "R$ 1.800,00", discount: "R$ 0,00", netValue: "R$ 1.800,00", issued: "01/03/2026", due: "15/03/2026", paid: "-", status: "Vencido", method: "PIX", stripe: true },
-  { id: "FAT-2026-0044", client: "LogiTech BR", description: "Plano Enterprise - Abril/2026", grossValue: "R$ 9.600,00", discount: "R$ 480,00", netValue: "R$ 9.120,00", issued: "01/04/2026", due: "25/04/2026", paid: "-", status: "Pendente", method: "Cartão", stripe: true },
+  { id: "FAT-0041", client: "Tech Solutions Ltda", description: "Plano Enterprise", value: "R$ 8.500,00", due: "15/04/2026", status: "Pago", method: "PIX" },
+  { id: "FAT-0042", client: "Nexus Digital", description: "Módulo Analytics", value: "R$ 6.460,00", due: "20/04/2026", status: "Pendente", method: "Boleto" },
+  { id: "FAT-0038", client: "Innovare Consultoria", description: "Consultoria Setup", value: "R$ 2.100,00", due: "10/04/2026", status: "Vencido", method: "Boleto" },
+  { id: "FAT-0043", client: "Criativa Design", description: "Plano Pro", value: "R$ 5.200,00", due: "15/04/2026", status: "Pago", method: "Cartão" },
+  { id: "FAT-0035", client: "Verde Energia", description: "Plano Básico", value: "R$ 1.800,00", due: "15/03/2026", status: "Vencido", method: "PIX" },
+  { id: "FAT-0044", client: "LogiTech BR", description: "Plano Enterprise", value: "R$ 9.120,00", due: "25/04/2026", status: "Pendente", method: "Cartão" },
 ];
 
 const statusBadge: Record<string, "default" | "secondary" | "destructive" | "outline"> = { Pago: "default", Pendente: "secondary", Vencido: "destructive", Cancelado: "outline" };
 
 export function ReceivablesPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Contas a Receber</h1>
-          <p className="text-muted-foreground mt-1">Gerencie seus recebíveis</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Contas a Receber</h1>
+          <p className="text-sm font-mono text-muted-foreground mt-1">Gestão de recebíveis</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Exportar</Button>
-          <Button size="sm"><Plus className="w-4 h-4 mr-2" />Nova Cobrança</Button>
+          <Button variant="outline" size="sm" className="rounded-sm"><Download className="w-3.5 h-3.5 mr-2" />Exportar</Button>
+          <Button size="sm" className="rounded-sm"><Plus className="w-3.5 h-3.5 mr-2" />Nova Fatura</Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-4 border-y border-border">
         {summaryCards.map((card, i) => (
-          <Card key={i}>
-            <CardContent className="pt-4 flex items-center gap-3">
-              <div className={`p-2 rounded-lg bg-muted ${card.color}`}><card.icon className="w-5 h-5" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">{card.title}</p>
-                <p className="text-xl font-bold">{card.value}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div key={i} className="flex flex-col space-y-1">
+            <span className="text-xs uppercase tracking-wider font-medium text-muted-foreground">{card.title}</span>
+            <span className={`text-2xl font-mono ${card.highlight ? 'text-destructive' : 'text-foreground'}`}>{card.value}</span>
+          </div>
         ))}
       </div>
 
-      <div className="flex gap-3">
-        <div className="relative flex-1">
+      <div className="flex gap-3 items-center">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Buscar por cliente, documento..." className="pl-9" data-testid="input-search-receivables" />
+          <Input placeholder="Buscar fatura, cliente..." className="pl-9 rounded-sm border-muted-foreground/20 focus-visible:ring-accent" data-testid="input-search-receivables" />
         </div>
-        <Button variant="outline" size="sm"><Filter className="w-4 h-4 mr-2" />Filtros</Button>
+        <Button variant="ghost" size="sm" className="text-muted-foreground"><Filter className="w-4 h-4 mr-2" />Filtros</Button>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Documento</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Valor Líquido</TableHead>
-                <TableHead>Vencimento</TableHead>
-                <TableHead>Pagamento</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Método</TableHead>
+      <div className="border border-border rounded-sm overflow-hidden">
+        <Table>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">ID</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Cliente / Descrição</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Valor</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Vencimento</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {receivables.map(r => (
+              <TableRow key={r.id} className="hover:bg-muted/30 transition-colors">
+                <TableCell className="text-sm font-mono py-3 text-muted-foreground">{r.id}</TableCell>
+                <TableCell className="py-3">
+                  <div className="text-sm font-medium">{r.client}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{r.description}</div>
+                </TableCell>
+                <TableCell className="text-sm font-mono font-medium py-3">{r.value}</TableCell>
+                <TableCell className="text-sm font-mono py-3 text-muted-foreground">{r.due}</TableCell>
+                <TableCell className="py-3 text-right">
+                  <Badge variant={statusBadge[r.status]} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
+                    {r.status}
+                  </Badge>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {receivables.map(r => (
-                <TableRow key={r.id}>
-                  <TableCell className="text-sm font-mono">{r.id}</TableCell>
-                  <TableCell className="text-sm font-medium">{r.client}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{r.description}</TableCell>
-                  <TableCell className="text-sm font-medium">{r.netValue}</TableCell>
-                  <TableCell className="text-sm">{r.due}</TableCell>
-                  <TableCell className="text-sm">{r.paid}</TableCell>
-                  <TableCell><Badge variant={statusBadge[r.status]}>{r.status}</Badge></TableCell>
-                  <TableCell className="text-sm flex items-center gap-1">{r.method}{r.stripe && <Badge variant="outline" className="text-[10px] ml-1">Stripe</Badge>}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

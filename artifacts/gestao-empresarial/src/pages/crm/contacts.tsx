@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
 import { Search, Plus, Upload, Download, Filter } from "lucide-react";
 import { Link } from "wouter";
 
@@ -37,72 +35,77 @@ export function ContactsPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Contatos</h1>
-          <p className="text-muted-foreground mt-1">{contacts.length} contatos cadastrados</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Contatos</h1>
+          <p className="text-sm font-mono text-muted-foreground mt-1">{contacts.length} registros</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm"><Upload className="w-4 h-4 mr-2" />Importar CSV</Button>
-          <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Exportar</Button>
-          <Button size="sm"><Plus className="w-4 h-4 mr-2" />Novo Contato</Button>
+          <Button variant="outline" size="sm" className="rounded-sm"><Upload className="w-3.5 h-3.5 mr-2" />Importar</Button>
+          <Button variant="outline" size="sm" className="rounded-sm"><Download className="w-3.5 h-3.5 mr-2" />Exportar</Button>
+          <Button size="sm" className="rounded-sm"><Plus className="w-3.5 h-3.5 mr-2" />Novo</Button>
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <div className="relative flex-1">
+      <div className="flex gap-3 items-center">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Buscar por nome, empresa ou e-mail..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} data-testid="input-search-contacts" />
+          <Input 
+            placeholder="Buscar por nome, empresa ou e-mail..." 
+            className="pl-9 rounded-sm border-muted-foreground/20 focus-visible:ring-accent" 
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+            data-testid="input-search-contacts" 
+          />
         </div>
-        <Button variant="outline" size="sm"><Filter className="w-4 h-4 mr-2" />Filtros</Button>
+        <Button variant="ghost" size="sm" className="text-muted-foreground"><Filter className="w-4 h-4 mr-2" />Filtros</Button>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Contato</TableHead>
-                <TableHead>E-mail</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Responsável</TableHead>
-                <TableHead>Último Contato</TableHead>
-                <TableHead>Engajamento</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map(contact => (
-                <TableRow key={contact.id} className="cursor-pointer hover:bg-muted/50">
-                  <TableCell>
-                    <Link href={`/crm/contacts/${contact.id}`} className="flex items-center gap-3">
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback className="text-xs">{contact.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium" data-testid={`text-contact-name-${contact.id}`}>{contact.name}</div>
-                        <div className="text-xs text-muted-foreground">{contact.company}</div>
+      <div className="border border-border rounded-sm overflow-hidden">
+        <Table>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Contato</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">E-mail</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Telefone</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Status</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Responsável</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Último Contato</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map(contact => (
+              <TableRow key={contact.id} className="cursor-pointer hover:bg-muted/30 transition-colors">
+                <TableCell className="py-3">
+                  <Link href={`/crm/contacts/${contact.id}`} className="flex items-center gap-3">
+                    <Avatar className="w-8 h-8 rounded-sm">
+                      <AvatarFallback className="text-[10px] font-mono bg-secondary text-secondary-foreground rounded-sm">
+                        {contact.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium text-sm text-foreground hover:text-accent transition-colors" data-testid={`text-contact-name-${contact.id}`}>
+                        {contact.name}
                       </div>
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-sm">{contact.email}</TableCell>
-                  <TableCell className="text-sm">{contact.phone}</TableCell>
-                  <TableCell><Badge variant={statusColors[contact.status] || "outline"}>{contact.status}</Badge></TableCell>
-                  <TableCell className="text-sm">{contact.responsible}</TableCell>
-                  <TableCell className="text-sm">{contact.lastContact}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Progress value={contact.score} className="w-16 h-2" />
-                      <span className="text-xs text-muted-foreground">{contact.score}</span>
+                      <div className="text-xs text-muted-foreground mt-0.5">{contact.company}</div>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </Link>
+                </TableCell>
+                <TableCell className="text-sm py-3">{contact.email}</TableCell>
+                <TableCell className="text-sm font-mono py-3">{contact.phone}</TableCell>
+                <TableCell className="py-3">
+                  <Badge variant={statusColors[contact.status] || "outline"} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
+                    {contact.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-sm py-3 text-muted-foreground">{contact.responsible}</TableCell>
+                <TableCell className="text-sm font-mono py-3 text-right text-muted-foreground">{contact.lastContact}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

@@ -1,79 +1,112 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DollarSign, TrendingUp, AlertTriangle, RefreshCw } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
 const dailyReceipts = [
-  { day: "01", current: 18200, previous: 15400 }, { day: "05", current: 24500, previous: 22000 },
-  { day: "10", current: 31200, previous: 28000 }, { day: "15", current: 45800, previous: 38000 },
-  { day: "20", current: 12000, previous: 32000 }, { day: "25", current: 0, previous: 28500 },
-  { day: "30", current: 0, previous: 18200 },
-];
-
-const paymentMethods = [
-  { name: "Cartão", value: 45, color: "hsl(221, 83%, 53%)" },
-  { name: "PIX", value: 30, color: "hsl(160, 60%, 45%)" },
-  { name: "Boleto", value: 20, color: "hsl(40, 90%, 50%)" },
-  { name: "Transferência", value: 5, color: "hsl(280, 60%, 50%)" },
+  { day: "01", current: 18200 }, { day: "05", current: 24500 },
+  { day: "10", current: 31200 }, { day: "15", current: 45800 },
+  { day: "20", current: 12000 }, { day: "25", current: 0 },
+  { day: "30", current: 0 },
 ];
 
 const mrrTrend = [
-  { month: "Mai/25", value: 98000 }, { month: "Jun/25", value: 102000 }, { month: "Jul/25", value: 108000 },
-  { month: "Ago/25", value: 115000 }, { month: "Set/25", value: 120000 }, { month: "Out/25", value: 126000 },
-  { month: "Nov/25", value: 131000 }, { month: "Dez/25", value: 135000 }, { month: "Jan/26", value: 140000 },
-  { month: "Fev/26", value: 145000 }, { month: "Mar/26", value: 148000 }, { month: "Abr/26", value: 156000 },
+  { month: "Out", value: 126000 }, { month: "Nov", value: 131000 }, { month: "Dez", value: 135000 }, 
+  { month: "Jan", value: 140000 }, { month: "Fev", value: 145000 }, { month: "Mar", value: 148000 }, 
+  { month: "Abr", value: 156000 },
 ];
 
 const topDefaulters = [
-  { client: "Innovare Consultoria", value: "R$ 2.100,00", days: 5, lastContact: "12/04/2026" },
-  { client: "Verde Energia", value: "R$ 1.800,00", days: 31, lastContact: "15/03/2026" },
-  { client: "StarUp Labs", value: "R$ 3.200,00", days: 12, lastContact: "08/04/2026" },
+  { client: "Innovare Consultoria", value: "R$ 2.100,00", days: 5 },
+  { client: "Verde Energia", value: "R$ 1.800,00", days: 31 },
+  { client: "StarUp Labs", value: "R$ 3.200,00", days: 12 },
 ];
 
 export function BillingDashboardPage() {
   return (
-    <div className="space-y-6">
-      <div><h1 className="text-3xl font-bold tracking-tight">Faturamento</h1><p className="text-muted-foreground mt-1">Visão geral de cobranças e receita</p></div>
+    <div className="space-y-10">
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight">Faturamento</h1>
+        <p className="text-sm font-mono text-muted-foreground mt-1">Visão geral de cobranças e receita</p>
+      </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-4 border-y border-border">
         {[
-          { title: "MRR", value: "R$ 156.000", icon: DollarSign, sub: "+5.4% vs mês anterior" },
-          { title: "ARR (Projeção)", value: "R$ 1.872.000", icon: TrendingUp, sub: "Baseado no MRR atual" },
-          { title: "Inadimplência", value: "4.8%", icon: AlertTriangle, sub: "R$ 32.400 vencido" },
-          { title: "Assinaturas Ativas", value: "87", icon: RefreshCw, sub: "3 novas este mês" },
+          { title: "MRR", value: "R$ 156k" },
+          { title: "ARR", value: "R$ 1.87M" },
+          { title: "Inadimplência", value: "4.8%", alert: true },
+          { title: "Assinaturas", value: "87" },
         ].map((kpi, i) => (
-          <Card key={i}><CardContent className="pt-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-muted"><kpi.icon className="w-5 h-5 text-muted-foreground" /></div><div><p className="text-xs text-muted-foreground">{kpi.title}</p><p className="text-xl font-bold">{kpi.value}</p><p className="text-xs text-muted-foreground">{kpi.sub}</p></div></div></CardContent></Card>
+          <div key={i} className="flex flex-col space-y-1">
+            <span className="text-xs uppercase tracking-wider font-medium text-muted-foreground">{kpi.title}</span>
+            <span className={`text-2xl font-mono ${kpi.alert ? 'text-destructive' : 'text-foreground'}`}>{kpi.value}</span>
+          </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card><CardHeader><CardTitle>Recebimentos Diários</CardTitle></CardHeader><CardContent className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={dailyReceipts}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="day" axisLine={false} tickLine={false} /><YAxis axisLine={false} tickLine={false} tickFormatter={v => `${v/1000}k`} /><Tooltip /><Legend /><Bar dataKey="current" name="Abril/2026" fill="hsl(var(--chart-1))" radius={[4,4,0,0]} /><Bar dataKey="previous" name="Março/2026" fill="hsl(var(--chart-3))" radius={[4,4,0,0]} opacity={0.5} /></BarChart>
-          </ResponsiveContainer>
-        </CardContent></Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div className="space-y-4">
+          <h2 className="text-sm uppercase tracking-wider font-medium text-muted-foreground">MRR (Últimos 6 meses)</h2>
+          <div className="h-[250px] -ml-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={mrrTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontFamily: 'var(--font-mono)' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tickFormatter={v => `${v/1000}k`} tick={{ fontSize: 12, fontFamily: 'var(--font-mono)' }} />
+                <Tooltip contentStyle={{ borderRadius: '2px', border: '1px solid hsl(var(--border))', fontFamily: 'var(--font-mono)', fontSize: '12px' }} />
+                <Line type="stepAfter" dataKey="value" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-        <Card><CardHeader><CardTitle>Métodos de Pagamento</CardTitle></CardHeader><CardContent className="h-[300px] flex items-center justify-center">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart><Pie data={paymentMethods} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value" label={({ name, value }) => `${name} ${value}%`}>{paymentMethods.map((entry, i) => <Cell key={i} fill={entry.color} />)}</Pie><Tooltip /></PieChart>
-          </ResponsiveContainer>
-        </CardContent></Card>
+        <div className="space-y-4">
+          <h2 className="text-sm uppercase tracking-wider font-medium text-muted-foreground">Recebimentos (Abril)</h2>
+          <div className="h-[250px] -ml-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={dailyReceipts} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontFamily: 'var(--font-mono)' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tickFormatter={v => `${v/1000}k`} tick={{ fontSize: 12, fontFamily: 'var(--font-mono)' }} />
+                <Tooltip contentStyle={{ borderRadius: '2px', border: '1px solid hsl(var(--border))', fontFamily: 'var(--font-mono)', fontSize: '12px' }} cursor={{ fill: 'hsl(var(--muted))' }} />
+                <Bar dataKey="current" fill="hsl(var(--accent))" radius={[2,2,0,0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
-      <Card><CardHeader><CardTitle>Evolução MRR - Últimos 12 meses</CardTitle></CardHeader><CardContent className="h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={mrrTrend}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="month" axisLine={false} tickLine={false} /><YAxis axisLine={false} tickLine={false} tickFormatter={v => `R$${v/1000}k`} /><Tooltip /><Line type="monotone" dataKey="value" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={{ r: 3 }} /></LineChart>
-        </ResponsiveContainer>
-      </CardContent></Card>
-
-      <Card><CardHeader><CardTitle>Top Inadimplentes</CardTitle></CardHeader><CardContent className="p-0">
-        <Table><TableHeader><TableRow><TableHead>Cliente</TableHead><TableHead>Valor</TableHead><TableHead>Dias em Atraso</TableHead><TableHead>Último Contato</TableHead><TableHead></TableHead></TableRow></TableHeader>
-        <TableBody>{topDefaulters.map((d, i) => (
-          <TableRow key={i}><TableCell className="font-medium">{d.client}</TableCell><TableCell>{d.value}</TableCell><TableCell><Badge variant="destructive">{d.days} dias</Badge></TableCell><TableCell className="text-sm">{d.lastContact}</TableCell><TableCell><Button variant="outline" size="sm">Enviar Lembrete</Button></TableCell></TableRow>
-        ))}</TableBody></Table>
-      </CardContent></Card>
+      <div className="space-y-4">
+        <h2 className="text-sm uppercase tracking-wider font-medium text-muted-foreground">Atenção Necessária</h2>
+        <div className="border border-border rounded-sm overflow-hidden">
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Cliente</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Valor</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Atraso</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Ação</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {topDefaulters.map((d, i) => (
+                <TableRow key={i} className="hover:bg-muted/30 transition-colors">
+                  <TableCell className="py-3 text-sm font-medium">{d.client}</TableCell>
+                  <TableCell className="py-3 text-sm font-mono">{d.value}</TableCell>
+                  <TableCell className="py-3">
+                    <Badge variant="destructive" className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
+                      {d.days} dias
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="py-3 text-right">
+                    <Button variant="outline" size="sm" className="rounded-sm h-7 text-xs">Cobrar</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
     </div>
   );
 }

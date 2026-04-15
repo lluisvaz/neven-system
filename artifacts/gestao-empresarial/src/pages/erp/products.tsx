@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,55 +6,77 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Search, Filter } from "lucide-react";
 
 const products = [
-  { sku: "PLN-BAS", name: "Plano Básico", type: "Assinatura Recorrente", price: "R$ 1.800,00/mês", unit: "Mês", recurrence: "Mensal", trial: 14, stock: null, active: true },
-  { sku: "PLN-PRO", name: "Plano Pro", type: "Assinatura Recorrente", price: "R$ 5.200,00/mês", unit: "Mês", recurrence: "Mensal", trial: 14, stock: null, active: true },
-  { sku: "PLN-ENT", name: "Plano Enterprise", type: "Assinatura Recorrente", price: "R$ 12.000,00/mês", unit: "Mês", recurrence: "Mensal", trial: 30, stock: null, active: true },
-  { sku: "SRV-SET", name: "Setup e Implantação", type: "Serviço Avulso", price: "R$ 4.000,00", unit: "Un", recurrence: "-", trial: 0, stock: null, active: true },
-  { sku: "SRV-CON", name: "Consultoria Técnica", type: "Serviço Avulso", price: "R$ 350,00/hora", unit: "Hora", recurrence: "-", trial: 0, stock: null, active: true },
-  { sku: "MOD-ANA", name: "Módulo Analytics", type: "Assinatura Recorrente", price: "R$ 3.500,00/mês", unit: "Mês", recurrence: "Mensal", trial: 7, stock: null, active: true },
-  { sku: "MOD-API", name: "API Avançada", type: "Assinatura Recorrente", price: "R$ 2.000,00/mês", unit: "Mês", recurrence: "Mensal", trial: 0, stock: null, active: false },
-  { sku: "TRN-ONL", name: "Treinamento Online", type: "Produto Digital", price: "R$ 800,00", unit: "Un", recurrence: "-", trial: 0, stock: null, active: true },
+  { sku: "PLN-BAS", name: "Plano Básico", type: "Assinatura Recorrente", price: "R$ 1.800,00", unit: "Mês", recurrence: "Mensal", active: true },
+  { sku: "PLN-PRO", name: "Plano Pro", type: "Assinatura Recorrente", price: "R$ 5.200,00", unit: "Mês", recurrence: "Mensal", active: true },
+  { sku: "PLN-ENT", name: "Plano Enterprise", type: "Assinatura Recorrente", price: "R$ 12.000,00", unit: "Mês", recurrence: "Mensal", active: true },
+  { sku: "SRV-SET", name: "Setup e Implantação", type: "Serviço Avulso", price: "R$ 4.000,00", unit: "Unidade", recurrence: "-", active: true },
+  { sku: "SRV-CON", name: "Consultoria Técnica", type: "Serviço Avulso", price: "R$ 350,00", unit: "Hora", recurrence: "-", active: true },
+  { sku: "MOD-ANA", name: "Módulo Analytics", type: "Assinatura Recorrente", price: "R$ 3.500,00", unit: "Mês", recurrence: "Mensal", active: true },
+  { sku: "MOD-API", name: "API Avançada", type: "Assinatura Recorrente", price: "R$ 2.000,00", unit: "Mês", recurrence: "Mensal", active: false },
+  { sku: "TRN-ONL", name: "Treinamento Online", type: "Produto Digital", price: "R$ 800,00", unit: "Unidade", recurrence: "-", active: true },
 ];
 
-const typeColors: Record<string, "default" | "secondary" | "outline"> = { "Assinatura Recorrente": "default", "Serviço Avulso": "secondary", "Produto Digital": "outline" };
+const typeColors: Record<string, "default" | "secondary" | "outline"> = { 
+  "Assinatura Recorrente": "default", 
+  "Serviço Avulso": "secondary", 
+  "Produto Digital": "outline" 
+};
 
 export function ProductsPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Produtos e Serviços</h1>
-          <p className="text-muted-foreground mt-1">{products.length} itens no catálogo</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Catálogo</h1>
+          <p className="text-sm font-mono text-muted-foreground mt-1">{products.length} produtos e serviços</p>
         </div>
-        <Button size="sm"><Plus className="w-4 h-4 mr-2" />Novo Produto</Button>
+        <Button size="sm" className="rounded-sm"><Plus className="w-3.5 h-3.5 mr-2" />Novo Item</Button>
       </div>
 
-      <div className="flex gap-3">
-        <div className="relative flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input placeholder="Buscar por nome, SKU..." className="pl-9" data-testid="input-search-products" /></div>
-        <Button variant="outline" size="sm"><Filter className="w-4 h-4 mr-2" />Filtros</Button>
+      <div className="flex gap-3 items-center">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input placeholder="Buscar por SKU, nome..." className="pl-9 rounded-sm border-muted-foreground/20 focus-visible:ring-accent" data-testid="input-search-products" />
+        </div>
+        <Button variant="ghost" size="sm" className="text-muted-foreground"><Filter className="w-4 h-4 mr-2" />Filtros</Button>
       </div>
 
-      <Card><CardContent className="p-0">
+      <div className="border border-border rounded-sm overflow-hidden">
         <Table>
-          <TableHeader><TableRow>
-            <TableHead>SKU</TableHead><TableHead>Nome</TableHead><TableHead>Tipo</TableHead><TableHead>Preço</TableHead><TableHead>Unidade</TableHead><TableHead>Recorrência</TableHead><TableHead>Trial</TableHead><TableHead>Ativo</TableHead>
-          </TableRow></TableHeader>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-24">SKU</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Nome</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Tipo</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Preço</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Unidade</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Recorrência</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-center w-24">Status</TableHead>
+            </TableRow>
+          </TableHeader>
           <TableBody>
             {products.map(p => (
-              <TableRow key={p.sku} className={!p.active ? "opacity-50" : ""}>
-                <TableCell className="text-sm font-mono">{p.sku}</TableCell>
-                <TableCell className="text-sm font-medium">{p.name}</TableCell>
-                <TableCell><Badge variant={typeColors[p.type]} className="text-xs">{p.type}</Badge></TableCell>
-                <TableCell className="text-sm font-medium">{p.price}</TableCell>
-                <TableCell className="text-sm">{p.unit}</TableCell>
-                <TableCell className="text-sm">{p.recurrence}</TableCell>
-                <TableCell className="text-sm">{p.trial > 0 ? `${p.trial} dias` : "-"}</TableCell>
-                <TableCell><Switch checked={p.active} data-testid={`switch-product-${p.sku}`} /></TableCell>
+              <TableRow key={p.sku} className={`hover:bg-muted/30 transition-colors ${!p.active ? "opacity-50" : ""}`}>
+                <TableCell className="text-sm font-mono py-3 text-muted-foreground">{p.sku}</TableCell>
+                <TableCell className="py-3 font-medium text-sm">{p.name}</TableCell>
+                <TableCell className="py-3">
+                  <Badge variant={typeColors[p.type]} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
+                    {p.type}
+                  </Badge>
+                </TableCell>
+                <TableCell className="py-3 text-sm font-mono font-medium text-right">{p.price}</TableCell>
+                <TableCell className="py-3 text-sm text-muted-foreground">{p.unit}</TableCell>
+                <TableCell className="py-3 text-sm text-muted-foreground">{p.recurrence}</TableCell>
+                <TableCell className="py-3 text-center">
+                  <div className="flex justify-center">
+                    <Switch checked={p.active} data-testid={`switch-product-${p.sku}`} />
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </CardContent></Card>
+      </div>
     </div>
   );
 }

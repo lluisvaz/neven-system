@@ -1,7 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Download } from "lucide-react";
 
 const dreData = [
@@ -29,55 +27,74 @@ const dreData = [
 
 function formatCurrency(value: number) {
   const abs = Math.abs(value);
-  const formatted = `R$ ${abs.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  const formatted = abs.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return value < 0 ? `(${formatted})` : formatted;
 }
 
 export function DrePage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">DRE - Demonstrativo de Resultado</h1>
-          <p className="text-muted-foreground mt-1">Análise de resultado por período</p>
+          <h1 className="text-2xl font-semibold tracking-tight">DRE</h1>
+          <p className="text-sm font-mono text-muted-foreground mt-1">Demonstrativo de Resultado do Exercício</p>
         </div>
         <div className="flex gap-2">
-          <Select defaultValue="mensal"><SelectTrigger className="w-36"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="mensal">Mensal</SelectItem><SelectItem value="trimestral">Trimestral</SelectItem><SelectItem value="anual">Anual</SelectItem></SelectContent></Select>
-          <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Exportar PDF</Button>
+           <div className="flex border border-border rounded-sm overflow-hidden text-sm">
+            <button className="px-3 py-1.5 hover:bg-muted/50 transition-colors">Anual</button>
+            <button className="px-3 py-1.5 hover:bg-muted/50 transition-colors border-l border-r border-border">Trimestral</button>
+            <button className="px-3 py-1.5 bg-muted font-medium transition-colors">Mensal</button>
+          </div>
+          <Button variant="outline" size="sm" className="rounded-sm"><Download className="w-3.5 h-3.5 mr-2" />Exportar</Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader><CardTitle>Abril/2026 vs Março/2026</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[400px]">Conta</TableHead>
-                <TableHead className="text-right">Abril/2026</TableHead>
-                <TableHead className="text-right">Março/2026</TableHead>
-                <TableHead className="text-right">Variação</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {dreData.map((row, i) => {
-                const variation = row.previous !== 0 ? ((row.current - row.previous) / Math.abs(row.previous) * 100) : 0;
-                const isPositive = (row.current >= 0 && variation > 0) || (row.current < 0 && variation < 0);
-                return (
-                  <TableRow key={i} className={row.isHeader ? "bg-muted/50 font-semibold" : ""}>
-                    <TableCell className={`text-sm ${row.level === 1 ? "pl-8" : ""}`}>{row.category}</TableCell>
-                    <TableCell className={`text-sm text-right ${row.current < 0 ? "text-red-600" : ""}`}>{formatCurrency(row.current)}</TableCell>
-                    <TableCell className={`text-sm text-right ${row.previous < 0 ? "text-red-600" : ""}`}>{formatCurrency(row.previous)}</TableCell>
-                    <TableCell className={`text-sm text-right ${isPositive ? "text-emerald-600" : "text-red-600"}`}>
+      <div className="border border-border rounded-sm overflow-hidden">
+        <div className="bg-muted/50 p-4 border-b border-border flex justify-between items-center">
+           <h2 className="text-sm font-medium">Comparativo Mensal</h2>
+           <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Abril/2026 vs Março/2026</span>
+        </div>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent border-b-2">
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-[400px]">Conta</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Abril/2026</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Março/2026</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right w-32">Variação</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {dreData.map((row, i) => {
+              const variation = row.previous !== 0 ? ((row.current - row.previous) / Math.abs(row.previous) * 100) : 0;
+              // A variation is "good" if it's revenue going up or expenses going down
+              const isRevenue = i < 4 || (i >= 7 && i <= 8) || i == 12 || i >= 17; // Roughly identifying revenue/profit lines
+              const isPositiveEffect = (row.current >= 0 && variation > 0) || (row.current < 0 && variation > 0);
+              
+              return (
+                <TableRow key={i} className={`hover:bg-muted/30 transition-colors ${row.isHeader ? "bg-muted/10 border-b border-border" : "border-b-0"}`}>
+                  <TableCell className={`py-2 text-sm ${row.isHeader ? 'font-medium uppercase tracking-wider text-xs' : 'text-muted-foreground pl-8'}`}>
+                    {row.category}
+                  </TableCell>
+                  <TableCell className={`py-2 text-sm font-mono text-right ${row.isHeader ? 'font-medium text-foreground' : ''}`}>
+                    {formatCurrency(row.current)}
+                  </TableCell>
+                  <TableCell className={`py-2 text-sm font-mono text-right text-muted-foreground ${row.isHeader ? 'font-medium' : ''}`}>
+                    {formatCurrency(row.previous)}
+                  </TableCell>
+                  <TableCell className={`py-2 text-sm font-mono text-right ${row.isHeader ? 'font-medium' : ''}`}>
+                    <span className={`px-2 py-0.5 rounded-sm text-[10px] ${
+                      variation === 0 ? 'text-muted-foreground' :
+                      isPositiveEffect ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30' : 'text-rose-600 bg-rose-50 dark:bg-rose-950/30'
+                    }`}>
                       {variation > 0 ? "+" : ""}{variation.toFixed(1)}%
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                    </span>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
