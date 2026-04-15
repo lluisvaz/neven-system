@@ -21,6 +21,7 @@ const navigation: NavEntry[] = [
       { name: "Contatos", href: "/crm/contacts", icon: Users },
       { name: "Pipeline", href: "/crm/pipeline", icon: GitBranch },
       { name: "Atividades", href: "/crm/activities", icon: CheckSquare },
+      { name: "Comunicações", href: "/communications", icon: MessageSquare },
     ]
   },
   {
@@ -48,7 +49,6 @@ const navigation: NavEntry[] = [
   },
   { name: "Propostas", href: "/proposals", icon: FileCheck, single: true },
   { name: "Onboarding", href: "/onboarding", icon: Rocket, single: true },
-  { name: "Comunicações", href: "/communications", icon: MessageSquare, single: true },
   { name: "Configurações", href: "/settings", icon: Settings, single: true },
 ];
 

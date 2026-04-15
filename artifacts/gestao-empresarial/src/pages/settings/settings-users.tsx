@@ -2,14 +2,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Building2, Users, Puzzle, Settings2, Shield, Plus, MoreHorizontal } from "lucide-react";
+import { Building2, Users, Puzzle, Shield, Plus, MoreHorizontal } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 const settingsNav = [
   { name: "Empresa", href: "/settings", icon: Building2 },
   { name: "Usuários", href: "/settings/users", icon: Users },
   { name: "Integrações", href: "/settings/integrations", icon: Puzzle },
-  { name: "Campos Customizados", href: "/settings/custom-fields", icon: Settings2 },
   { name: "Auditoria", href: "/settings/audit", icon: Shield },
 ];
 

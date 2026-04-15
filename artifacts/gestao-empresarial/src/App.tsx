@@ -25,7 +25,6 @@ import { TicketDetailPage } from "@/pages/support/ticket-detail";
 import { SettingsCompanyPage } from "@/pages/settings/settings-company";
 import { SettingsUsersPage } from "@/pages/settings/settings-users";
 import { SettingsIntegrationsPage } from "@/pages/settings/settings-integrations";
-import { SettingsCustomFieldsPage } from "@/pages/settings/settings-custom-fields";
 import { SettingsAuditPage } from "@/pages/settings/settings-audit";
 import { PortalDashboardPage } from "@/pages/portal/portal-dashboard";
 import { PortalInvoicesPage } from "@/pages/portal/portal-invoices";
@@ -67,7 +66,6 @@ function Router() {
       <Route path="/settings"><AdminLayout><SettingsCompanyPage /></AdminLayout></Route>
       <Route path="/settings/users"><AdminLayout><SettingsUsersPage /></AdminLayout></Route>
       <Route path="/settings/integrations"><AdminLayout><SettingsIntegrationsPage /></AdminLayout></Route>
-      <Route path="/settings/custom-fields"><AdminLayout><SettingsCustomFieldsPage /></AdminLayout></Route>
       <Route path="/settings/audit"><AdminLayout><SettingsAuditPage /></AdminLayout></Route>
 
       <Route path="/onboarding"><AdminLayout><OnboardingPage /></AdminLayout></Route>

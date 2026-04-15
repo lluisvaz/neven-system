@@ -2,11 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
-  Activity,
   AlertTriangle,
   Banknote,
   BarChart3,
-  Boxes,
   CheckCircle2,
   Clock3,
   CreditCard,
@@ -74,7 +72,6 @@ const kpis = [
   { title: "Inadimplência", value: "3,6%", trend: "+0,8 p.p.", tone: "warning", icon: AlertTriangle, note: "Cobranças vencidas" },
   { title: "NPS", value: "72", trend: "+6 pts", tone: "positive", icon: HeartPulse, note: "Satisfação dos clientes" },
   { title: "SLA suporte", value: "94%", trend: "+5 p.p.", tone: "positive", icon: TicketCheck, note: "Atendidos no prazo" },
-  { title: "Estoque crítico", value: "12 SKUs", trend: "+3", tone: "warning", icon: Boxes, note: "Reposição urgente" },
   { title: "Margem bruta", value: "63,4%", trend: "+2,1 p.p.", tone: "positive", icon: Gauge, note: "Eficiência operacional" },
   { title: "Runway", value: "14 meses", trend: "+2 meses", tone: "positive", icon: Banknote, note: "Fôlego de caixa" },
 ];
@@ -85,7 +82,6 @@ const executiveInsights = [
   { area: "Financeiro", insight: "Inadimplência subiu para 3,6%; três clientes concentram R$ 15,5 mil em risco imediato.", impact: "Crítica", action: "Executar régua de cobrança e renegociação em até 48h." },
   { area: "Cliente", insight: "NPS avançou para 72, porém contas com chamados recorrentes têm churn previsto 2,8x maior.", impact: "Alta", action: "Criar plano de sucesso para clientes com mais de 3 tickets no mês." },
   { area: "Operações", insight: "Tempo médio de onboarding caiu para 9 dias, mas implantação contábil segue como gargalo.", impact: "Média", action: "Padronizar checklist e automatizar coleta documental." },
-  { area: "Estoque", insight: "12 SKUs estão abaixo do ponto mínimo e podem afetar contratos ativos nos próximos 10 dias.", impact: "Alta", action: "Antecipar compra dos itens A da curva ABC." },
 ];
 
 const billingRisk = [
@@ -101,7 +97,6 @@ const operationalAlerts = [
   { title: "Tickets críticos abertos", value: "7", status: "2 fora do SLA", icon: Clock3 },
   { title: "Pedidos pendentes de expedição", value: "23", status: "R$ 61 mil", icon: PackageCheck },
   { title: "Propostas aguardando assinatura", value: "R$ 142 mil", status: "11 propostas", icon: BarChart3 },
-  { title: "Automações com falha", value: "3", status: "Revisar integrações", icon: Activity },
 ];
 
 const formatCurrency = (value: number) => `R$ ${(value / 1000).toLocaleString("pt-BR")}k`;
@@ -364,8 +359,8 @@ export function Dashboard() {
               "Cobrar 4 faturas críticas antes das 15h.",
               "Revisar 11 propostas sem resposta há 7 dias.",
               "Resolver 2 tickets fora do SLA.",
-              "Aprovar compra de 12 SKUs críticos.",
               "Acionar clientes com health score abaixo de 60.",
+              "Acompanhar onboarding de 3 novos clientes.",
             ].map((item, index) => (
               <div key={item} className="flex gap-3 text-sm">
                 <span className="font-mono text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>
