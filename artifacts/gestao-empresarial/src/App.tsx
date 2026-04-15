@@ -14,6 +14,7 @@ import { AutomationsPage } from "@/pages/crm/automations";
 import { ReceivablesPage } from "@/pages/erp/receivables";
 import { PayablesPage } from "@/pages/erp/payables";
 import { CashflowPage } from "@/pages/erp/cashflow";
+import { DistributionPage } from "@/pages/erp/distribution";
 import { DrePage } from "@/pages/erp/dre";
 import { ProductsPage } from "@/pages/erp/products";
 import { ContractsPage } from "@/pages/erp/contracts";
@@ -59,6 +60,7 @@ function Router() {
       <Route path="/erp/receivables"><AdminLayout><ReceivablesPage /></AdminLayout></Route>
       <Route path="/erp/payables"><AdminLayout><PayablesPage /></AdminLayout></Route>
       <Route path="/erp/cashflow"><AdminLayout><CashflowPage /></AdminLayout></Route>
+      <Route path="/erp/distribution"><AdminLayout><DistributionPage /></AdminLayout></Route>
       <Route path="/erp/dre"><AdminLayout><DrePage /></AdminLayout></Route>
       <Route path="/erp/products"><AdminLayout><ProductsPage /></AdminLayout></Route>
       <Route path="/erp/contracts"><AdminLayout><ContractsPage /></AdminLayout></Route>

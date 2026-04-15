@@ -30,5 +30,6 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - Sidebar scrollbars are visually hidden while preserving scroll behavior.
 - Admin and portal navigation now include mobile-friendly menu behavior.
 - Dashboard was expanded into an executive insight view covering revenue, sales, finance, customer health, operations, support, inventory, and daily priorities.
+- ERP includes a Financial Distribution page for configuring company cash, partner withdrawals, and expense allocation categories.
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.

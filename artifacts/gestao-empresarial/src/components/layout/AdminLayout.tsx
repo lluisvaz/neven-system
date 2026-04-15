@@ -22,6 +22,7 @@ const navigation = [
       { name: "A Receber", href: "/erp/receivables" },
       { name: "A Pagar", href: "/erp/payables" },
       { name: "Fluxo de Caixa", href: "/erp/cashflow" },
+      { name: "Distribuição", href: "/erp/distribution" },
       { name: "DRE", href: "/erp/dre" },
       { name: "Produtos", href: "/erp/products" },
       { name: "Contratos", href: "/erp/contracts" },
