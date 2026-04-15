@@ -1,13 +1,12 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, FileText, CreditCard, HelpCircle, FolderOpen, User, LogOut, Briefcase, ChevronRight, Menu, X, Globe } from "lucide-react";
+import { LayoutDashboard, FileText, HelpCircle, FolderOpen, User, LogOut, Briefcase, Menu, X } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
 
 const portalNav = [
   { name: "Painel", href: "/portal", icon: LayoutDashboard },
   { name: "Faturas", href: "/portal/invoices", icon: FileText },
-  { name: "Planos", href: "/portal/plans", icon: CreditCard },
   { name: "Chamados", href: "/portal/tickets", icon: HelpCircle },
   { name: "Documentos", href: "/portal/documents", icon: FolderOpen },
   { name: "Perfil", href: "/portal/profile", icon: User },

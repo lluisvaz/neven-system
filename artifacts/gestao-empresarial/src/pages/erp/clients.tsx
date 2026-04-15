@@ -53,7 +53,11 @@ const clients = [
     proposals: [
       { id: "PROP-042", name: "Renovação Anual Enterprise", value: 144000, expiry: "30/04/2026", status: "Aceita", views: 3 },
     ],
-    portalAccess: { enabled: true, lastLogin: "14/04/2026", modules: { invoices: true, plans: true, tickets: true, documents: true } },
+    subscriptions: [
+      { id: "SUB-001", name: "GestorPro Enterprise", plan: "Enterprise", status: "Ativa" as const, mrr: 12000, nextBilling: "01/05/2026", billingCycle: "Mensal", paymentMethod: "PIX", startDate: "01/01/2026" },
+      { id: "SUB-002", name: "Módulo Analytics", plan: "Add-on", status: "Ativa" as const, mrr: 3500, nextBilling: "01/05/2026", billingCycle: "Mensal", paymentMethod: "PIX", startDate: "15/03/2026" },
+    ],
+    portalAccess: { enabled: true, lastLogin: "14/04/2026", modules: { invoices: true, tickets: true, documents: true } },
     responsible: "Rafael Mendes", contractId: "CTR-26-001",
   },
   {
@@ -83,7 +87,10 @@ const clients = [
     proposals: [
       { id: "PROP-038", name: "Upgrade para Enterprise", value: 144000, expiry: "01/05/2026", status: "Enviada", views: 5 },
     ],
-    portalAccess: { enabled: true, lastLogin: "12/04/2026", modules: { invoices: true, plans: true, tickets: false, documents: true } },
+    subscriptions: [
+      { id: "SUB-003", name: "GestorPro Pro", plan: "Pro", status: "Ativa" as const, mrr: 5200, nextBilling: "15/05/2026", billingCycle: "Mensal", paymentMethod: "Cartão •••• 1234", startDate: "14/02/2026" },
+    ],
+    portalAccess: { enabled: true, lastLogin: "12/04/2026", modules: { invoices: true, tickets: false, documents: true } },
     responsible: "Maria Santos", contractId: "CTR-26-008",
   },
   {
@@ -111,7 +118,10 @@ const clients = [
       { name: "Go-live", status: "done" },
     ],
     proposals: [],
-    portalAccess: { enabled: true, lastLogin: "13/04/2026", modules: { invoices: true, plans: true, tickets: true, documents: true } },
+    subscriptions: [
+      { id: "SUB-004", name: "GestorPro Enterprise", plan: "Enterprise", status: "Ativa" as const, mrr: 2400, nextBilling: "01/05/2026", billingCycle: "Monthly", paymentMethod: "Card •••• 4242", startDate: "01/01/2026" },
+    ],
+    portalAccess: { enabled: true, lastLogin: "13/04/2026", modules: { invoices: true, tickets: true, documents: true } },
     responsible: "Maria Santos", contractId: "CTR-26-009",
   },
   {
@@ -141,7 +151,10 @@ const clients = [
     proposals: [
       { id: "PROP-041", name: "Renovação + Upgrade", value: 36000, expiry: "28/04/2026", status: "Em negociação", views: 8 },
     ],
-    portalAccess: { enabled: false, lastLogin: "-", modules: { invoices: false, plans: false, tickets: false, documents: false } },
+    subscriptions: [
+      { id: "SUB-005", name: "Consultoria Técnica", plan: "Service", status: "Ativa" as const, mrr: 2100, nextBilling: "30/04/2026", billingCycle: "Mensal", paymentMethod: "Boleto", startDate: "01/05/2025" },
+    ],
+    portalAccess: { enabled: false, lastLogin: "-", modules: { invoices: false, tickets: false, documents: false } },
     responsible: "Rafael Mendes", contractId: "CTR-25-042",
   },
 ];
@@ -270,8 +283,14 @@ function OverviewTab({ client }: { client: Client }) {
 }
 
 function BillingTab({ client }: { client: Client }) {
+  const [showNewSub, setShowNewSub] = useState(false);
   const country = getCountry(client.country);
   const gMeta = GATEWAY_META[client.gateway];
+
+  const subStatusVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+    Ativa: "default", Pausada: "secondary", Cancelada: "destructive",
+  };
+
   return (
     <div className="space-y-6">
       <div className={`flex items-start gap-3 p-3 border rounded-sm ${gMeta.borderColor} ${gMeta.bgColor}`}>
@@ -283,18 +302,97 @@ function BillingTab({ client }: { client: Client }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 py-4 border-y border-border">
-        <div>
-          <p className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground mb-1">MRR</p>
-          <p className="text-xl font-mono">{fmt(client.mrr, client.currency, client.locale)}</p>
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground">Assinaturas</p>
+          <Button size="sm" variant="outline" className="rounded-sm h-7 text-xs px-3" onClick={() => setShowNewSub(v => !v)}>
+            <Plus className="w-3 h-3 mr-1.5" />{showNewSub ? "Cancelar" : "Nova Assinatura"}
+          </Button>
         </div>
-        <div>
-          <p className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground mb-1">Próx. Cobrança</p>
-          <p className="text-xl font-mono">{client.nextBilling}</p>
+
+        {showNewSub && (
+          <div className="border border-border rounded-sm bg-muted/20 p-4 mb-3 animate-in fade-in slide-in-from-top-2 duration-200 space-y-4">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Nova Assinatura para {client.name}</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Plano / Produto</Label>
+                <Select>
+                  <SelectTrigger className="rounded-sm h-9"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
+                  <SelectContent>
+                    {["Básico", "Pro", "Pro + API", "Enterprise", "Módulo Analytics", "Módulo BI", "Consultoria"].map(p => (
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Ciclo de Cobrança</Label>
+                <Select defaultValue="monthly">
+                  <SelectTrigger className="rounded-sm h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Mensal</SelectItem>
+                    <SelectItem value="quarterly">Trimestral</SelectItem>
+                    <SelectItem value="yearly">Anual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Valor ({country.currency})</Label>
+                <div className="flex">
+                  <span className="flex items-center px-2.5 border border-r-0 border-border rounded-l-sm bg-muted/40 text-xs font-mono text-muted-foreground">{country.currencySymbol}</span>
+                  <Input placeholder="0,00" className="rounded-l-none rounded-r-sm h-9 font-mono text-right" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Início da Cobrança</Label>
+                <Input type="date" className="rounded-sm h-9 font-mono" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="ghost" size="sm" className="rounded-sm" onClick={() => setShowNewSub(false)}>Cancelar</Button>
+              <Button size="sm" className="rounded-sm px-6">Criar Assinatura</Button>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          {client.subscriptions.map(sub => (
+            <div key={sub.id} className="border border-border rounded-sm p-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-sm bg-muted flex items-center justify-center flex-shrink-0">
+                  <CreditCard className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium">{sub.name}</p>
+                    <Badge variant={subStatusVariant[sub.status]} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">{sub.status}</Badge>
+                  </div>
+                  <p className="text-xs font-mono text-muted-foreground mt-0.5">{sub.id} · desde {sub.startDate} · {sub.billingCycle}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-base font-mono font-semibold">{fmt(sub.mrr, client.currency, client.locale)}</p>
+                  <p className="text-xs text-muted-foreground">próx. {sub.nextBilling} · {sub.paymentMethod}</p>
+                </div>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-sm" title="Pausar">
+                    <PauseCircle className="w-4 h-4 text-muted-foreground" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-sm" title="Cancelar assinatura">
+                    <XCircle className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-        <div>
-          <p className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground mb-1">Pagamento</p>
-          <p className="text-sm font-medium mt-1">{client.paymentMethod}</p>
+
+        <div className="flex items-center justify-between p-3 bg-muted/20 border border-border rounded-sm mt-2">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total MRR ({client.currency})</span>
+          <span className="text-base font-mono font-semibold">
+            {fmt(client.subscriptions.filter(s => s.status === "Ativa").reduce((acc, s) => acc + s.mrr, 0), client.currency, client.locale)}
+          </span>
         </div>
       </div>
 
@@ -526,7 +624,6 @@ function OnboardingTab({ client }: { client: Client }) {
 function PortalTab({ client }: { client: Client }) {
   const portalModules = [
     { key: "invoices", label: "Faturas", icon: CreditCard, desc: "Visualizar e baixar faturas" },
-    { key: "plans", label: "Planos", icon: Package, desc: "Ver e solicitar mudanças de plano" },
     { key: "tickets", label: "Suporte", icon: HelpIcon, desc: "Abrir e acompanhar tickets" },
     { key: "documents", label: "Documentos", icon: FileText, desc: "Acessar documentos e contratos" },
   ];

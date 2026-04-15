@@ -27,7 +27,6 @@ import { SettingsIntegrationsPage } from "@/pages/settings/settings-integrations
 import { SettingsAuditPage } from "@/pages/settings/settings-audit";
 import { PortalDashboardPage } from "@/pages/portal/portal-dashboard";
 import { PortalInvoicesPage } from "@/pages/portal/portal-invoices";
-import { PortalPlansPage } from "@/pages/portal/portal-plans";
 import { PortalTicketsPage } from "@/pages/portal/portal-tickets";
 import { PortalDocumentsPage } from "@/pages/portal/portal-documents";
 import { PortalProfilePage } from "@/pages/portal/portal-profile";
@@ -72,7 +71,6 @@ function Router() {
 
       <Route path="/portal"><PortalLayout><PortalDashboardPage /></PortalLayout></Route>
       <Route path="/portal/invoices"><PortalLayout><PortalInvoicesPage /></PortalLayout></Route>
-      <Route path="/portal/plans"><PortalLayout><PortalPlansPage /></PortalLayout></Route>
       <Route path="/portal/tickets"><PortalLayout><PortalTicketsPage /></PortalLayout></Route>
       <Route path="/portal/documents"><PortalLayout><PortalDocumentsPage /></PortalLayout></Route>
       <Route path="/portal/profile"><PortalLayout><PortalProfilePage /></PortalLayout></Route>
