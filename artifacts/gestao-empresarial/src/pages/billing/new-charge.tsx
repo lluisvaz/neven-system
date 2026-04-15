@@ -4,10 +4,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, CreditCard, QrCode, FileText } from "lucide-react";
+import { Plus, Trash2, CreditCard, QrCode, FileText, Zap, Building, Globe } from "lucide-react";
+import { GATEWAY_META, COUNTRIES, type Gateway } from "@/lib/client-config";
+
+const mockClients = [
+  { name: "Tech Solutions Ltda", gateway: "asaas" as Gateway, currency: "BRL", currencySymbol: "R$", country: "BR", methods: ["PIX", "Boleto Bancário", "Cartão de Crédito"] },
+  { name: "Nexus Digital", gateway: "asaas" as Gateway, currency: "BRL", currencySymbol: "R$", country: "BR", methods: ["PIX", "Boleto Bancário", "Cartão de Crédito"] },
+  { name: "Acme Corp", gateway: "stripe" as Gateway, currency: "USD", currencySymbol: "$", country: "US", methods: ["Credit Card", "ACH / Bank Transfer", "Wire Transfer"] },
+  { name: "Innovare Consultoria", gateway: "asaas" as Gateway, currency: "BRL", currencySymbol: "R$", country: "BR", methods: ["PIX", "Boleto Bancário", "Cartão de Crédito"] },
+];
+
+const methodIcons: Record<string, React.ElementType> = {
+  "PIX": QrCode,
+  "Boleto Bancário": FileText,
+  "Cartão de Crédito": CreditCard,
+  "Cartão de Débito": CreditCard,
+  "Credit Card": CreditCard,
+  "ACH / Bank Transfer": Building,
+  "Wire Transfer": Globe,
+};
 
 export function NewChargePage() {
   const [step, setStep] = useState(1);
+  const [selectedClient, setSelectedClient] = useState(mockClients[0]);
+
+  const gMeta = GATEWAY_META[selectedClient.gateway];
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -19,8 +40,8 @@ export function NewChargePage() {
       <div className="flex items-center gap-2 border-b border-border pb-4">
         {[1, 2, 3].map((s, i) => (
           <div key={s} className="flex items-center">
-            <span className={`text-xs font-mono uppercase tracking-wider ${step >= s ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-              {s}. {s === 1 ? 'Dados' : s === 2 ? 'Recorrência' : 'Pagamento'}
+            <span className={`text-xs font-mono uppercase tracking-wider ${step >= s ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+              {s}. {s === 1 ? "Dados" : s === 2 ? "Recorrência" : "Pagamento"}
             </span>
             {i < 2 && <span className="text-muted-foreground/30 mx-3">/</span>}
           </div>
@@ -32,14 +53,40 @@ export function NewChargePage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Cliente</Label>
-              <Input placeholder="Buscar cliente..." className="rounded-sm" data-testid="input-charge-client" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Tipo de Cobrança</Label>
-              <Select defaultValue="avulsa">
+              <Select value={selectedClient.name} onValueChange={v => setSelectedClient(mockClients.find(c => c.name === v) ?? mockClients[0])}>
                 <SelectTrigger className="rounded-sm">
                   <SelectValue />
                 </SelectTrigger>
+                <SelectContent>
+                  {mockClients.map(c => (
+                    <SelectItem key={c.name} value={c.name}>
+                      <span className="flex items-center gap-2">
+                        <span>{COUNTRIES.find(x => x.code === c.country)?.flag}</span>
+                        <span>{c.name}</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded border font-mono ${GATEWAY_META[c.gateway].color} ${GATEWAY_META[c.gateway].bgColor} ${GATEWAY_META[c.gateway].borderColor}`}>
+                          {GATEWAY_META[c.gateway].label}
+                        </span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {selectedClient && (
+              <div className={`flex items-center gap-3 p-3 rounded-sm border ${gMeta.borderColor} ${gMeta.bgColor}`}>
+                <Zap className={`w-4 h-4 flex-shrink-0 ${gMeta.color}`} />
+                <div>
+                  <p className={`text-xs font-semibold ${gMeta.color}`}>Processando via {gMeta.label}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{gMeta.description}</p>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Tipo de Cobrança</Label>
+              <Select defaultValue="avulsa">
+                <SelectTrigger className="rounded-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="avulsa">Avulsa</SelectItem>
                   <SelectItem value="recorrente">Recorrente (Assinatura)</SelectItem>
@@ -54,8 +101,11 @@ export function NewChargePage() {
             <div className="border border-border rounded-sm overflow-hidden">
               <div className="flex items-center gap-3 p-3 bg-muted/30 border-b border-border">
                 <div className="flex-1"><p className="text-sm font-medium">Plano Enterprise</p></div>
-                <div className="w-24"><Input className="h-8 rounded-sm text-right font-mono" defaultValue="12000.00" /></div>
-                <div className="w-16"><Input className="h-8 rounded-sm text-center font-mono" type="number" defaultValue="1" /></div>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-muted-foreground font-mono">{selectedClient.currencySymbol}</span>
+                  <Input className="h-8 rounded-sm text-right font-mono w-28" defaultValue="12000.00" />
+                </div>
+                <Input className="h-8 rounded-sm text-center font-mono w-16" type="number" defaultValue="1" />
                 <Button variant="ghost" size="icon" className="w-8 h-8 rounded-sm"><Trash2 className="w-4 h-4 text-muted-foreground" /></Button>
               </div>
               <div className="p-2 bg-muted/10">
@@ -70,14 +120,14 @@ export function NewChargePage() {
               <Input type="date" className="rounded-sm font-mono" defaultValue="2026-04-30" />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Desconto (R$)</Label>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Desconto ({selectedClient.currency})</Label>
               <Input placeholder="0,00" className="rounded-sm font-mono text-right" />
             </div>
           </div>
 
           <div className="flex items-center justify-between py-4 border-y border-border mt-6">
             <span className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Total</span>
-            <span className="text-2xl font-mono tracking-tight">R$ 12.000,00</span>
+            <span className="text-2xl font-mono tracking-tight">{selectedClient.currencySymbol} 12.000,00</span>
           </div>
 
           <div className="space-y-2">
@@ -86,7 +136,7 @@ export function NewChargePage() {
           </div>
 
           <div className="flex justify-end pt-4">
-            <Button onClick={() => setStep(2)} className="rounded-sm px-8" data-testid="button-next-step">Próximo</Button>
+            <Button onClick={() => setStep(2)} className="rounded-sm px-8">Próximo</Button>
           </div>
         </div>
       )}
@@ -126,32 +176,39 @@ export function NewChargePage() {
 
       {step === 3 && (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-          <p className="text-sm text-muted-foreground">Selecione as formas de pagamento que o cliente poderá utilizar.</p>
-          
+          <div className={`flex items-center gap-3 p-3 rounded-sm border ${gMeta.borderColor} ${gMeta.bgColor}`}>
+            <Zap className={`w-4 h-4 flex-shrink-0 ${gMeta.color}`} />
+            <p className={`text-xs font-semibold ${gMeta.color}`}>
+              Métodos de pagamento disponíveis via {gMeta.label} para {selectedClient.name}
+            </p>
+          </div>
+
+          <p className="text-sm text-muted-foreground">Selecione os métodos que o cliente poderá utilizar nesta cobrança.</p>
+
           <div className="space-y-3">
-            {[
-              { id: "pix", name: "PIX", icon: QrCode, desc: "Aprovação instantânea, taxa zero" },
-              { id: "cc", name: "Cartão de Crédito", icon: CreditCard, desc: "D+30, taxa 2.99%" },
-              { id: "boleto", name: "Boleto Bancário", icon: FileText, desc: "D+1, taxa fixa R$ 2,50" },
-            ].map(method => (
-              <label key={method.id} className="flex items-start gap-4 p-4 border border-border rounded-sm cursor-pointer hover:bg-muted/30 transition-colors [&:has(:checked)]:border-accent [&:has(:checked)]:bg-accent/5">
-                <div className="mt-0.5">
-                  <input type="checkbox" className="w-4 h-4 rounded-sm border-border text-accent focus:ring-accent" defaultChecked />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <method.icon className="w-4 h-4" />
-                    <span className="font-medium text-sm">{method.name}</span>
+            {selectedClient.methods.map(method => {
+              const Icon = methodIcons[method] ?? CreditCard;
+              return (
+                <label key={method} className="flex items-start gap-4 p-4 border border-border rounded-sm cursor-pointer hover:bg-muted/30 transition-colors [&:has(:checked)]:border-accent [&:has(:checked)]:bg-accent/5">
+                  <div className="mt-0.5">
+                    <input type="checkbox" className="w-4 h-4 rounded-sm border-border text-accent focus:ring-accent" defaultChecked />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">{method.desc}</p>
-                </div>
-              </label>
-            ))}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4" />
+                      <span className="font-medium text-sm">{method}</span>
+                    </div>
+                  </div>
+                </label>
+              );
+            })}
           </div>
 
           <div className="flex justify-between pt-6 border-t border-border">
             <Button variant="outline" onClick={() => setStep(2)} className="rounded-sm">Voltar</Button>
-            <Button className="rounded-sm px-8 bg-accent hover:bg-accent/90 text-accent-foreground" data-testid="button-create-charge">Gerar Cobrança</Button>
+            <Button className="rounded-sm px-8 bg-accent hover:bg-accent/90 text-accent-foreground">
+              Gerar Cobrança via {gMeta.label}
+            </Button>
           </div>
         </div>
       )}

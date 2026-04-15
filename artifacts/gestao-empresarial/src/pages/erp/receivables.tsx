@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Filter, Download } from "lucide-react";
+import { GATEWAY_META, type Gateway } from "@/lib/client-config";
 
 const summaryCards = [
   { title: "A Receber", value: "R$ 248.500", highlight: false },
@@ -12,15 +13,27 @@ const summaryCards = [
 ];
 
 const receivables = [
-  { id: "FAT-0041", client: "Tech Solutions Ltda", description: "Plano Enterprise", value: "R$ 8.500,00", due: "15/04/2026", status: "Pago", method: "PIX" },
-  { id: "FAT-0042", client: "Nexus Digital", description: "Módulo Analytics", value: "R$ 6.460,00", due: "20/04/2026", status: "Pendente", method: "Boleto" },
-  { id: "FAT-0038", client: "Innovare Consultoria", description: "Consultoria Setup", value: "R$ 2.100,00", due: "10/04/2026", status: "Vencido", method: "Boleto" },
-  { id: "FAT-0043", client: "Criativa Design", description: "Plano Pro", value: "R$ 5.200,00", due: "15/04/2026", status: "Pago", method: "Cartão" },
-  { id: "FAT-0035", client: "Verde Energia", description: "Plano Básico", value: "R$ 1.800,00", due: "15/03/2026", status: "Vencido", method: "PIX" },
-  { id: "FAT-0044", client: "LogiTech BR", description: "Plano Enterprise", value: "R$ 9.120,00", due: "25/04/2026", status: "Pendente", method: "Cartão" },
+  { id: "FAT-0041", client: "Tech Solutions Ltda", description: "Plano Enterprise", value: "R$ 8.500,00", currency: "BRL", due: "15/04/2026", status: "Pago", method: "PIX", gateway: "asaas" as Gateway },
+  { id: "FAT-0042", client: "Nexus Digital", description: "Módulo Analytics", value: "R$ 6.460,00", currency: "BRL", due: "20/04/2026", status: "Pendente", method: "Boleto", gateway: "asaas" as Gateway },
+  { id: "FAT-0038", client: "Innovare Consultoria", description: "Consultoria Setup", value: "R$ 2.100,00", currency: "BRL", due: "10/04/2026", status: "Vencido", method: "Boleto", gateway: "asaas" as Gateway },
+  { id: "FAT-0043", client: "Criativa Design", description: "Plano Pro", value: "R$ 5.200,00", currency: "BRL", due: "15/04/2026", status: "Pago", method: "Cartão", gateway: "asaas" as Gateway },
+  { id: "FAT-0044", client: "LogiTech BR", description: "Plano Enterprise", value: "R$ 9.120,00", currency: "BRL", due: "25/04/2026", status: "Pendente", method: "Cartão", gateway: "asaas" as Gateway },
+  { id: "INV-0039", client: "Acme Corp", description: "Enterprise Plan", value: "$ 2.400,00", currency: "USD", due: "01/05/2026", status: "Pendente", method: "Card •••• 4242", gateway: "stripe" as Gateway },
+  { id: "FAT-0035", client: "Verde Energia", description: "Plano Básico", value: "R$ 1.800,00", currency: "BRL", due: "15/03/2026", status: "Vencido", method: "PIX", gateway: "asaas" as Gateway },
 ];
 
-const statusBadge: Record<string, "default" | "secondary" | "destructive" | "outline"> = { Pago: "default", Pendente: "secondary", Vencido: "destructive", Cancelado: "outline" };
+const statusBadge: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  Pago: "default", Pendente: "secondary", Vencido: "destructive", Cancelado: "outline",
+};
+
+function GatewayPill({ gateway }: { gateway: Gateway }) {
+  const m = GATEWAY_META[gateway];
+  return (
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium border ${m.color} ${m.bgColor} ${m.borderColor}`}>
+      {m.label}
+    </span>
+  );
+}
 
 export function ReceivablesPage() {
   return (
@@ -28,7 +41,7 @@ export function ReceivablesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Contas a Receber</h1>
-          <p className="text-sm font-mono text-muted-foreground mt-1">Gestão de recebíveis</p>
+          <p className="text-sm font-mono text-muted-foreground mt-1">Gestão de recebíveis · Stripe + Asaas</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="rounded-sm"><Download className="w-3.5 h-3.5 mr-2" />Exportar</Button>
@@ -40,15 +53,37 @@ export function ReceivablesPage() {
         {summaryCards.map((card, i) => (
           <div key={i} className="flex flex-col space-y-1">
             <span className="text-xs uppercase tracking-wider font-medium text-muted-foreground">{card.title}</span>
-            <span className={`text-2xl font-mono ${card.highlight ? 'text-destructive' : 'text-foreground'}`}>{card.value}</span>
+            <span className={`text-2xl font-mono ${card.highlight ? "text-destructive" : "text-foreground"}`}>{card.value}</span>
           </div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 py-3 border-b border-border">
+        {(["asaas", "stripe"] as Gateway[]).map(gw => {
+          const m = GATEWAY_META[gw];
+          const gwItems = receivables.filter(r => r.gateway === gw);
+          return (
+            <div key={gw} className={`flex items-center justify-between p-3 rounded-sm border ${m.borderColor} ${m.bgColor}`}>
+              <div>
+                <p className={`text-xs font-semibold ${m.color}`}>{m.label}</p>
+                <p className="text-xs text-muted-foreground">{gwItems.length} faturas</p>
+              </div>
+              <div className="text-right">
+                <p className={`text-sm font-mono font-semibold ${m.color}`}>
+                  {gwItems.filter(r => r.status === "Vencido").length > 0
+                    ? `${gwItems.filter(r => r.status === "Vencido").length} vencida(s)`
+                    : "Em dia"}
+                </p>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex gap-3 items-center">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Buscar fatura, cliente..." className="pl-9 rounded-sm border-muted-foreground/20 focus-visible:ring-accent" data-testid="input-search-receivables" />
+          <Input placeholder="Buscar fatura, cliente..." className="pl-9 rounded-sm border-muted-foreground/20 focus-visible:ring-accent" />
         </div>
         <Button variant="ghost" size="sm" className="text-muted-foreground"><Filter className="w-4 h-4 mr-2" />Filtros</Button>
       </div>
@@ -59,8 +94,9 @@ export function ReceivablesPage() {
             <TableRow className="hover:bg-transparent">
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10">ID</TableHead>
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Cliente / Descrição</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Valor</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Gateway · Método</TableHead>
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Vencimento</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Valor</TableHead>
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Status</TableHead>
             </TableRow>
           </TableHeader>
@@ -72,8 +108,14 @@ export function ReceivablesPage() {
                   <div className="text-sm font-medium">{r.client}</div>
                   <div className="text-xs text-muted-foreground mt-0.5">{r.description}</div>
                 </TableCell>
-                <TableCell className="text-sm font-mono font-medium py-3">{r.value}</TableCell>
+                <TableCell className="py-3">
+                  <div className="flex items-center gap-2">
+                    <GatewayPill gateway={r.gateway} />
+                    <span className="text-xs text-muted-foreground">{r.method}</span>
+                  </div>
+                </TableCell>
                 <TableCell className="text-sm font-mono py-3 text-muted-foreground">{r.due}</TableCell>
+                <TableCell className="text-sm font-mono font-medium py-3 text-right">{r.value}</TableCell>
                 <TableCell className="py-3 text-right">
                   <Badge variant={statusBadge[r.status]} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
                     {r.status}
