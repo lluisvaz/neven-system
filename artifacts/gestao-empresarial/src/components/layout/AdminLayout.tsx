@@ -1,60 +1,55 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  Briefcase, FileText, Settings, HelpCircle, DollarSign,
-  Package, Send, ThumbsUp, Share2, MessageSquare, Rocket,
-  BarChart3, ChevronRight, Users, Menu, X
+  Briefcase, FileText, Settings, ChevronRight, Menu, X,
+  LayoutDashboard, Users, GitBranch, CheckSquare, Building2,
+  ArrowDownLeft, ArrowUpRight, TrendingUp, Truck, Package,
+  FileCheck2, CreditCard, RefreshCw, LifeBuoy, Rocket,
+  MessageSquare, FileCheck, Plus
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const navigation = [
-  { name: "Dashboard", href: "/" },
+type NavItem = { name: string; href: string; icon: React.ElementType };
+type NavGroup = { name: string; items: NavItem[] };
+type NavSingle = { name: string; href: string; icon: React.ElementType; single: true };
+type NavEntry = NavGroup | NavSingle;
+
+const navigation: NavEntry[] = [
+  { name: "Dashboard", href: "/", icon: LayoutDashboard, single: true },
   {
     name: "CRM", items: [
-      { name: "Contatos", href: "/crm/contacts" },
-      { name: "Pipeline", href: "/crm/pipeline" },
-      { name: "Atividades", href: "/crm/activities" },
-      { name: "Automações", href: "/crm/automations" },
+      { name: "Contatos", href: "/crm/contacts", icon: Users },
+      { name: "Pipeline", href: "/crm/pipeline", icon: GitBranch },
+      { name: "Atividades", href: "/crm/activities", icon: CheckSquare },
     ]
   },
   {
     name: "ERP", items: [
-      { name: "Clientes", href: "/erp/clients" },
-      { name: "A Receber", href: "/erp/receivables" },
-      { name: "A Pagar", href: "/erp/payables" },
-      { name: "Fluxo de Caixa", href: "/erp/cashflow" },
-      { name: "Distribuição", href: "/erp/distribution" },
-      { name: "DRE", href: "/erp/dre" },
-      { name: "Produtos", href: "/erp/products" },
-      { name: "Contratos", href: "/erp/contracts" },
-      { name: "Estoque", href: "/erp/inventory" },
+      { name: "Clientes", href: "/erp/clients", icon: Building2 },
+      { name: "A Receber", href: "/erp/receivables", icon: ArrowDownLeft },
+      { name: "A Pagar", href: "/erp/payables", icon: ArrowUpRight },
+      { name: "Fluxo de Caixa", href: "/erp/cashflow", icon: TrendingUp },
+      { name: "Distribuição", href: "/erp/distribution", icon: Truck },
+      { name: "Produtos", href: "/erp/products", icon: Package },
+      { name: "Contratos", href: "/erp/contracts", icon: FileCheck2 },
     ]
   },
   {
     name: "Faturamento", items: [
-      { name: "Visão Geral", href: "/billing" },
-      { name: "Nova Cobrança", href: "/billing/new" },
-      { name: "Assinaturas", href: "/billing/subscriptions" },
-    ]
-  },
-  {
-    name: "Relatórios", items: [
-      { name: "Dashboard", href: "/reports" },
-      { name: "Biblioteca", href: "/reports/library" },
+      { name: "Visão Geral", href: "/billing", icon: LayoutDashboard },
+      { name: "Nova Cobrança", href: "/billing/new", icon: Plus },
+      { name: "Assinaturas", href: "/billing/subscriptions", icon: RefreshCw },
     ]
   },
   {
     name: "Suporte", items: [
-      { name: "Tickets", href: "/support/tickets" },
-      { name: "Base de Conhecimento", href: "/support/knowledge" },
+      { name: "Tickets", href: "/support/tickets", icon: LifeBuoy },
     ]
   },
-  { name: "Propostas", href: "/proposals" },
-  { name: "Onboarding", href: "/onboarding" },
-  { name: "NPS", href: "/nps" },
-  { name: "Indicações", href: "/referrals" },
-  { name: "Comunicações", href: "/communications" },
-  { name: "Configurações", href: "/settings" },
+  { name: "Propostas", href: "/proposals", icon: FileCheck, single: true },
+  { name: "Onboarding", href: "/onboarding", icon: Rocket, single: true },
+  { name: "Comunicações", href: "/communications", icon: MessageSquare, single: true },
+  { name: "Configurações", href: "/settings", icon: Settings, single: true },
 ];
 
 export function AdminLayout({ children }: { children: ReactNode }) {
@@ -63,6 +58,13 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
   const isActive = (href: string) =>
     href === "/" ? location === "/" : location === href || location.startsWith(href + "/");
+
+  const linkClass = (href: string) =>
+    `flex items-center gap-2.5 px-2.5 h-8 rounded-sm text-sm transition-colors ${
+      isActive(href)
+        ? "bg-foreground text-background font-medium"
+        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+    }`;
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -74,11 +76,11 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         />
       )}
 
-      <aside className={`${mobileNavOpen ? "flex" : "hidden"} fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0 border-r border-border bg-sidebar flex-col overflow-hidden shadow-xl md:static md:z-auto md:flex md:w-56 md:shadow-none`}>
-        <div className="h-14 flex items-center justify-between px-4 sm:px-5 border-b border-border flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-foreground rounded-sm flex items-center justify-center">
-              <Briefcase className="w-2.5 h-2.5 text-background" />
+      <aside className={`${mobileNavOpen ? "flex" : "hidden"} fixed inset-y-0 left-0 z-50 w-60 flex-shrink-0 border-r border-border bg-sidebar flex-col overflow-hidden shadow-xl md:static md:z-auto md:flex md:w-52 md:shadow-none`}>
+        <div className="h-14 flex items-center justify-between px-4 border-b border-border flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 bg-foreground rounded-sm flex items-center justify-center flex-shrink-0">
+              <Briefcase className="w-3 h-3 text-background" />
             </div>
             <span className="text-sm font-semibold tracking-tight">GestorPro</span>
           </div>
@@ -91,61 +93,58 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           </button>
         </div>
 
-        <nav className="no-scrollbar flex-1 overflow-y-auto py-3 px-3 space-y-4">
-          {navigation.map((group) => (
-            <div key={group.name}>
-              {"items" in group ? (
-                <div>
-                  <p className="px-2 mb-1 text-[10px] font-medium uppercase tracking-widest text-muted-foreground/60 select-none">
-                    {group.name}
-                  </p>
-                  <div className="space-y-px">
-                    {group.items.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={`flex items-center px-2 h-7 rounded-sm text-sm transition-colors ${
-                          isActive(item.href)
-                            ? "bg-foreground text-background font-medium"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                        }`}
-                        onClick={() => setMobileNavOpen(false)}
-                        data-testid={`nav-${item.href.replace(/\//g, "-").slice(1)}`}
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ) : (
+        <nav className="no-scrollbar flex-1 overflow-y-auto py-3 px-2.5 space-y-0.5">
+          {navigation.map((entry) => {
+            if ("single" in entry) {
+              return (
                 <Link
-                  href={group.href!}
-                  className={`flex items-center px-2 h-7 rounded-sm text-sm transition-colors ${
-                    isActive(group.href!)
-                      ? "bg-foreground text-background font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
+                  key={entry.href}
+                  href={entry.href}
+                  className={linkClass(entry.href)}
                   onClick={() => setMobileNavOpen(false)}
-                  data-testid={`nav-${group.href === "/" ? "dashboard" : group.href!.replace(/\//g, "-").slice(1)}`}
+                  data-testid={`nav-${entry.href === "/" ? "dashboard" : entry.href.replace(/\//g, "-").slice(1)}`}
                 >
-                  {group.name}
+                  <entry.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                  {entry.name}
                 </Link>
-              )}
-            </div>
-          ))}
+              );
+            }
+
+            return (
+              <div key={entry.name} className="pt-4 first:pt-0">
+                <p className="px-2.5 mb-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50 select-none">
+                  {entry.name}
+                </p>
+                <div className="space-y-px">
+                  {entry.items.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={linkClass(item.href)}
+                      onClick={() => setMobileNavOpen(false)}
+                      data-testid={`nav-${item.href.replace(/\//g, "-").slice(1)}`}
+                    >
+                      <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </nav>
 
-        <div className="px-3 py-3 border-t border-border flex-shrink-0">
+        <div className="px-2.5 py-3 border-t border-border flex-shrink-0">
           <Link
             href="/portal"
-            className="flex items-center justify-between px-2 h-7 rounded-sm text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="flex items-center justify-between px-2.5 h-8 rounded-sm text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             onClick={() => setMobileNavOpen(false)}
           >
-            <span className="flex items-center gap-1.5">
-              <FileText className="w-3 h-3" />
+            <span className="flex items-center gap-2.5">
+              <FileText className="w-3.5 h-3.5 flex-shrink-0" />
               Portal do Cliente
             </span>
-            <ChevronRight className="w-3 h-3 opacity-50" />
+            <ChevronRight className="w-3 h-3 opacity-40" />
           </Link>
         </div>
       </aside>

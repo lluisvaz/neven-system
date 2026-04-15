@@ -10,24 +10,18 @@ import { ContactsPage } from "@/pages/crm/contacts";
 import { ContactDetailPage } from "@/pages/crm/contact-detail";
 import { PipelinePage } from "@/pages/crm/pipeline";
 import { ActivitiesPage } from "@/pages/crm/activities";
-import { AutomationsPage } from "@/pages/crm/automations";
 import { ClientsPage } from "@/pages/erp/clients";
 import { ReceivablesPage } from "@/pages/erp/receivables";
 import { PayablesPage } from "@/pages/erp/payables";
 import { CashflowPage } from "@/pages/erp/cashflow";
 import { DistributionPage } from "@/pages/erp/distribution";
-import { DrePage } from "@/pages/erp/dre";
 import { ProductsPage } from "@/pages/erp/products";
 import { ContractsPage } from "@/pages/erp/contracts";
-import { InventoryPage } from "@/pages/erp/inventory";
 import { BillingDashboardPage } from "@/pages/billing/billing-dashboard";
 import { NewChargePage } from "@/pages/billing/new-charge";
 import { SubscriptionsPage } from "@/pages/billing/subscriptions";
-import { ReportsDashboardPage } from "@/pages/reports/reports-dashboard";
-import { ReportsLibraryPage } from "@/pages/reports/reports-library";
 import { TicketsPage } from "@/pages/support/tickets";
 import { TicketDetailPage } from "@/pages/support/ticket-detail";
-import { KnowledgePage } from "@/pages/support/knowledge";
 import { SettingsCompanyPage } from "@/pages/settings/settings-company";
 import { SettingsUsersPage } from "@/pages/settings/settings-users";
 import { SettingsIntegrationsPage } from "@/pages/settings/settings-integrations";
@@ -41,8 +35,6 @@ import { PortalDocumentsPage } from "@/pages/portal/portal-documents";
 import { PortalProfilePage } from "@/pages/portal/portal-profile";
 import { OnboardingPage } from "@/pages/onboarding";
 import { ProposalsPage } from "@/pages/proposals";
-import { NpsPage } from "@/pages/nps";
-import { ReferralsPage } from "@/pages/referrals";
 import { CommunicationsPage } from "@/pages/communications";
 
 const queryClient = new QueryClient();
@@ -56,28 +48,21 @@ function Router() {
       <Route path="/crm/contacts/:id"><AdminLayout><ContactDetailPage /></AdminLayout></Route>
       <Route path="/crm/pipeline"><AdminLayout><PipelinePage /></AdminLayout></Route>
       <Route path="/crm/activities"><AdminLayout><ActivitiesPage /></AdminLayout></Route>
-      <Route path="/crm/automations"><AdminLayout><AutomationsPage /></AdminLayout></Route>
 
       <Route path="/erp/clients"><AdminLayout><ClientsPage /></AdminLayout></Route>
       <Route path="/erp/receivables"><AdminLayout><ReceivablesPage /></AdminLayout></Route>
       <Route path="/erp/payables"><AdminLayout><PayablesPage /></AdminLayout></Route>
       <Route path="/erp/cashflow"><AdminLayout><CashflowPage /></AdminLayout></Route>
       <Route path="/erp/distribution"><AdminLayout><DistributionPage /></AdminLayout></Route>
-      <Route path="/erp/dre"><AdminLayout><DrePage /></AdminLayout></Route>
       <Route path="/erp/products"><AdminLayout><ProductsPage /></AdminLayout></Route>
       <Route path="/erp/contracts"><AdminLayout><ContractsPage /></AdminLayout></Route>
-      <Route path="/erp/inventory"><AdminLayout><InventoryPage /></AdminLayout></Route>
 
       <Route path="/billing"><AdminLayout><BillingDashboardPage /></AdminLayout></Route>
       <Route path="/billing/new"><AdminLayout><NewChargePage /></AdminLayout></Route>
       <Route path="/billing/subscriptions"><AdminLayout><SubscriptionsPage /></AdminLayout></Route>
 
-      <Route path="/reports"><AdminLayout><ReportsDashboardPage /></AdminLayout></Route>
-      <Route path="/reports/library"><AdminLayout><ReportsLibraryPage /></AdminLayout></Route>
-
       <Route path="/support/tickets"><AdminLayout><TicketsPage /></AdminLayout></Route>
       <Route path="/support/tickets/:id"><AdminLayout><TicketDetailPage /></AdminLayout></Route>
-      <Route path="/support/knowledge"><AdminLayout><KnowledgePage /></AdminLayout></Route>
 
       <Route path="/settings"><AdminLayout><SettingsCompanyPage /></AdminLayout></Route>
       <Route path="/settings/users"><AdminLayout><SettingsUsersPage /></AdminLayout></Route>
@@ -87,8 +72,6 @@ function Router() {
 
       <Route path="/onboarding"><AdminLayout><OnboardingPage /></AdminLayout></Route>
       <Route path="/proposals"><AdminLayout><ProposalsPage /></AdminLayout></Route>
-      <Route path="/nps"><AdminLayout><NpsPage /></AdminLayout></Route>
-      <Route path="/referrals"><AdminLayout><ReferralsPage /></AdminLayout></Route>
       <Route path="/communications"><AdminLayout><CommunicationsPage /></AdminLayout></Route>
 
       <Route path="/portal"><PortalLayout><PortalDashboardPage /></PortalLayout></Route>
