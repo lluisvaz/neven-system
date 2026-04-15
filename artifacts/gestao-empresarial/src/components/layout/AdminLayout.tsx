@@ -18,9 +18,9 @@ const navigation: NavEntry[] = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard, single: true },
   {
     name: "CRM", items: [
-      { name: "Leads", href: "/crm/contacts", icon: Users },
-      { name: "Atividades", href: "/crm/activities", icon: CheckSquare },
-      { name: "Comunicações", href: "/communications", icon: MessageSquare },
+      { name: "Leads",        href: "/crm/contacts",      icon: Users },
+      { name: "Atividades",   href: "/crm/activities",    icon: CheckSquare },
+      { name: "Comunicações", href: "/crm/communications", icon: MessageSquare },
     ]
   },
   {

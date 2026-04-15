@@ -6,16 +6,10 @@ import NotFound from "@/pages/not-found";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { PortalLayout } from "@/components/layout/PortalLayout";
 import { Dashboard } from "@/pages/dashboard";
-import { ContactsPage } from "@/pages/crm/contacts";
-import { ContactDetailPage } from "@/pages/crm/contact-detail";
-import { ActivitiesPage } from "@/pages/crm/activities";
-import { ClientsPage } from "@/pages/erp/clients";
-import { DistributionPage } from "@/pages/erp/distribution";
-import { ProductsPage } from "@/pages/erp/products";
-import { ContractsPage } from "@/pages/erp/contracts";
+import { CrmPage } from "@/pages/crm/crm-page";
+import { ErpPage } from "@/pages/erp/erp-page";
 import { BillingPage } from "@/pages/billing/billing-page";
-import { TicketsPage } from "@/pages/support/tickets";
-import { TicketDetailPage } from "@/pages/support/ticket-detail";
+import { SupportPage } from "@/pages/support/support-page";
 import { SettingsCompanyPage } from "@/pages/settings/settings-company";
 import { SettingsUsersPage } from "@/pages/settings/settings-users";
 import { SettingsIntegrationsPage } from "@/pages/settings/settings-integrations";
@@ -27,7 +21,6 @@ import { PortalDocumentsPage } from "@/pages/portal/portal-documents";
 import { PortalProfilePage } from "@/pages/portal/portal-profile";
 import { OnboardingPage } from "@/pages/onboarding";
 import { ProposalsPage } from "@/pages/proposals";
-import { CommunicationsPage } from "@/pages/communications";
 
 const queryClient = new QueryClient();
 
@@ -36,17 +29,19 @@ function Router() {
     <Switch>
       <Route path="/"><AdminLayout><Dashboard /></AdminLayout></Route>
 
-      <Route path="/crm/contacts"><AdminLayout><ContactsPage /></AdminLayout></Route>
-      <Route path="/crm/contacts/:id"><AdminLayout><ContactDetailPage /></AdminLayout></Route>
-      <Route path="/crm/activities"><AdminLayout><ActivitiesPage /></AdminLayout></Route>
+      <Route path="/crm/contacts"><AdminLayout><CrmPage /></AdminLayout></Route>
+      <Route path="/crm/contacts/:id"><AdminLayout><CrmPage /></AdminLayout></Route>
+      <Route path="/crm/activities"><AdminLayout><CrmPage /></AdminLayout></Route>
+      <Route path="/crm/communications"><AdminLayout><CrmPage /></AdminLayout></Route>
+      <Route path="/communications"><Redirect to="/crm/communications" /></Route>
 
-      <Route path="/erp/clients"><AdminLayout><ClientsPage /></AdminLayout></Route>
+      <Route path="/erp/clients"><AdminLayout><ErpPage /></AdminLayout></Route>
+      <Route path="/erp/distribution"><AdminLayout><ErpPage /></AdminLayout></Route>
+      <Route path="/erp/products"><AdminLayout><ErpPage /></AdminLayout></Route>
+      <Route path="/erp/contracts"><AdminLayout><ErpPage /></AdminLayout></Route>
       <Route path="/erp/receivables"><Redirect to="/billing/receivables" /></Route>
       <Route path="/erp/payables"><Redirect to="/billing/payables" /></Route>
       <Route path="/erp/cashflow"><Redirect to="/billing/cashflow" /></Route>
-      <Route path="/erp/distribution"><AdminLayout><DistributionPage /></AdminLayout></Route>
-      <Route path="/erp/products"><AdminLayout><ProductsPage /></AdminLayout></Route>
-      <Route path="/erp/contracts"><AdminLayout><ContractsPage /></AdminLayout></Route>
 
       <Route path="/billing"><AdminLayout><BillingPage /></AdminLayout></Route>
       <Route path="/billing/receivables"><AdminLayout><BillingPage /></AdminLayout></Route>
@@ -55,8 +50,8 @@ function Router() {
       <Route path="/billing/subscriptions"><AdminLayout><BillingPage /></AdminLayout></Route>
       <Route path="/billing/new"><AdminLayout><BillingPage /></AdminLayout></Route>
 
-      <Route path="/support/tickets"><AdminLayout><TicketsPage /></AdminLayout></Route>
-      <Route path="/support/tickets/:id"><AdminLayout><TicketDetailPage /></AdminLayout></Route>
+      <Route path="/support/tickets"><AdminLayout><SupportPage /></AdminLayout></Route>
+      <Route path="/support/tickets/:id"><AdminLayout><SupportPage /></AdminLayout></Route>
 
       <Route path="/settings"><AdminLayout><SettingsCompanyPage /></AdminLayout></Route>
       <Route path="/settings/users"><AdminLayout><SettingsUsersPage /></AdminLayout></Route>
@@ -65,7 +60,6 @@ function Router() {
 
       <Route path="/onboarding"><AdminLayout><OnboardingPage /></AdminLayout></Route>
       <Route path="/proposals"><AdminLayout><ProposalsPage /></AdminLayout></Route>
-      <Route path="/communications"><AdminLayout><CommunicationsPage /></AdminLayout></Route>
 
       <Route path="/portal"><PortalLayout><PortalDashboardPage /></PortalLayout></Route>
       <Route path="/portal/invoices"><PortalLayout><PortalInvoicesPage /></PortalLayout></Route>
