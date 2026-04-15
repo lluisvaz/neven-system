@@ -5,184 +5,287 @@
  *
  * This file is the single source of truth for all financial
  * aggregation in the system. It combines balances from Stripe
- * and Asaas, converts everything to BRL, and exposes a React
- * hook (`useFinancialData`) consumed by every financial page.
+ * and Asaas, converts everything to BRL using LIVE exchange
+ * rates, and exposes React hooks consumed by every financial page.
  *
  * ──────────────────────────────────────────────────────────
- * HOW TO INTEGRATE (future AI / developer):
+ * EXCHANGE RATES — LIVE (no API key required)
+ * ──────────────────────────────────────────────────────────
+ * Source: economia.awesomeapi.com.br — aggregates from B3,
+ * Banco Central do Brasil, and commercial banks. Updates
+ * every ~15 min during market hours.
+ * Endpoint: GET https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,GBP-BRL,ARS-BRL,COP-BRL,MXN-BRL
+ * Cache TTL: 15 minutes (stored in sessionStorage)
+ *
+ * ──────────────────────────────────────────────────────────
+ * HOW TO INTEGRATE STRIPE + ASAAS (future AI / developer):
  * ──────────────────────────────────────────────────────────
  *
  * 1. STRIPE BALANCE
  *    Endpoint: GET https://api.stripe.com/v1/balance
  *    Auth:     Authorization: Bearer sk_live_YOUR_STRIPE_SECRET_KEY
  *    Docs:     https://stripe.com/docs/api/balance/retrieve
- *    Response shape (relevant fields):
- *      {
- *        available: [{ amount: number, currency: string }],  // amount in cents
- *        pending:   [{ amount: number, currency: string }],
- *      }
- *    Map to StripeBalance type below. Divide amount by 100 for real value.
- *    Store STRIPE_SECRET_KEY in environment variables (never hardcode).
+ *    Response: { available: [{ amount, currency }], pending: [...] }
+ *    amount is in cents — divide by 100. Convert to BRL using
+ *    the live rates returned by useExchangeRates().
+ *    Store STRIPE_SECRET_KEY in Replit Secrets (never hardcode).
  *
  * 2. ASAAS BALANCE
  *    Endpoint: GET https://www.asaas.com/api/v3/finance/balance
- *    Auth:     access_token: $aact_YOUR_ASAAS_TOKEN  (header)
+ *    Auth:     access_token: $aact_YOUR_ASAAS_TOKEN (header)
  *    Docs:     https://docs.asaas.com/reference/retornar-saldo
- *    Response shape:
- *      { balance: number }   // already in BRL
- *    Map to AsaasBalance type below.
- *    Store ASAAS_API_KEY in environment variables.
+ *    Response: { balance: number } — already in BRL, no conversion needed.
+ *    Store ASAAS_API_KEY in Replit Secrets.
  *
- * 3. EXCHANGE RATE (USD → BRL and others → BRL)
- *    Option A (free): GET https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL
- *    Option B (paid): https://openexchangerates.org/api/latest.json?app_id=YOUR_KEY
- *    Response (AwesomeAPI):
- *      { USDBRL: { bid: "5.12" }, EURBRL: { bid: "5.68" } }
- *    Store the rate in ExchangeRates type below.
- *
- * 4. WHERE TO MAKE THE API CALLS
- *    These calls must happen server-side (Express route in api-server)
- *    to avoid exposing API keys in the browser. Create:
+ * 3. WHERE TO CALL STRIPE + ASAAS
+ *    Create a backend route (api-server):
  *      GET /api/financial/summary
- *    This route fetches Stripe + Asaas + exchange rates, aggregates,
- *    and returns a `FinancialSummary` payload (type defined below).
- *    Then replace the mock `fetchFinancialSummary` function below
- *    with a real `fetch('/api/financial/summary')` call.
+ *    This route fetches Stripe balance + Asaas balance server-side,
+ *    receives live rates from this file (or re-fetches them on the server),
+ *    and returns a FinancialSummary payload.
+ *    Then in fetchGatewayBalances() below, replace the mock return with:
+ *      return fetch('/api/financial/summary').then(r => r.json())
  *
- * 5. SECRETS SETUP (Replit)
- *    Set these in Replit Secrets (never commit to code):
+ * 4. SECRETS SETUP (Replit)
+ *    Add in Replit Secrets panel:
  *      STRIPE_SECRET_KEY   = sk_live_...
  *      ASAAS_API_KEY       = $aact_...
- *      (optional) EXCHANGE_RATE_API_KEY = ...
  * ============================================================
  */
 
-// ─── TYPE DEFINITIONS ─────────────────────────────────────
+import { useState, useEffect, useRef, useCallback } from "react";
 
-/** Stripe balance as returned by GET /v1/balance (values in BRL after conversion) */
-export interface StripeBalance {
-  /** Available balance (settled, ready to payout) in BRL */
-  availableBRL: number;
-  /** Pending balance (not yet settled) in BRL */
-  pendingBRL: number;
-  /** Original currency of the Stripe account (e.g. "usd") */
-  originalCurrency: string;
-  /** Original available amount in the account's native currency */
-  originalAvailable: number;
-  /** Exchange rate used for conversion (e.g. USD/BRL = 5.12) */
-  exchangeRate: number;
-  /** ISO timestamp of the last sync */
-  lastSyncedAt: string;
+// ─── TYPES ──────────────────────────────────────────────────
+
+export interface LiveRate {
+  /** 1 unit of this currency = X BRL */
+  rate: number;
+  /** Commercial buy price (bid) */
+  bid: number;
+  /** Commercial sell price (ask) */
+  ask: number;
+  /** Highest rate today */
+  high: number;
+  /** Lowest rate today */
+  low: number;
+  /** Change vs previous close (e.g. "+0.02") */
+  varBid: string;
+  /** % change vs previous close */
+  pctChange: string;
+  /** When this quote was last updated (from source) */
+  quoteTime: string;
 }
 
-/** Asaas balance as returned by GET /api/v3/finance/balance (already in BRL) */
-export interface AsaasBalance {
-  /** Current balance in BRL */
-  balanceBRL: number;
-  /** ISO timestamp of the last sync */
-  lastSyncedAt: string;
-}
-
-/** Exchange rates relative to BRL */
 export interface ExchangeRates {
-  USD: number;  // 1 USD = X BRL
-  EUR: number;
-  GBP: number;
-  ARS: number;
-  COP: number;
-  MXN: number;
-  /** Timestamp of when rates were fetched */
+  USD: LiveRate;
+  EUR: LiveRate;
+  GBP: LiveRate;
+  ARS: LiveRate;
+  COP: LiveRate;
+  MXN: LiveRate;
+  /** When rates were last fetched from the API */
   fetchedAt: string;
+  /** True if rates came from the live API, false if fallback */
+  isLive: boolean;
+  /** Name of the source */
+  source: string;
 }
 
-/** Aggregated financial summary used by all pages */
+export interface StripeBalance {
+  availableBRL: number;
+  pendingBRL: number;
+  originalCurrency: string;
+  originalAvailable: number;
+  exchangeRate: number;
+  lastSyncedAt: string;
+}
+
+export interface AsaasBalance {
+  balanceBRL: number;
+  lastSyncedAt: string;
+}
+
 export interface FinancialSummary {
-  /** Combined total from Stripe + Asaas, in BRL */
   totalBalanceBRL: number;
-  /** MRR across all active subscriptions, in BRL */
   mrrBRL: number;
-  /** ARR (MRR × 12), in BRL */
   arrBRL: number;
-  /** Amount receivable (pending invoices), in BRL */
   receivableBRL: number;
-  /** Amount overdue, in BRL */
   overdueBRL: number;
-  /** Amount received this month, in BRL */
   receivedThisMonthBRL: number;
-  /** Delinquency rate as percentage */
   delinquencyRate: number;
-  /** Active subscription count */
   activeSubscriptions: number;
-  /** Breakdown by gateway */
   stripe: StripeBalance;
   asaas: AsaasBalance;
-  /** Exchange rates used for conversions */
   exchangeRates: ExchangeRates;
-  /** Whether data is from live API (true) or mock (false) */
+  /** False until Stripe + Asaas APIs are integrated */
   isLiveData: boolean;
-  /** ISO timestamp of last full refresh */
   lastRefreshedAt: string;
 }
 
-// ─── MOCK DATA ─────────────────────────────────────────────
-// ⚠️  REPLACE THIS with a real API call to /api/financial/summary
-// See integration instructions at the top of this file.
+// ─── CONSTANTS ──────────────────────────────────────────────
 
-const MOCK_EXCHANGE_RATES: ExchangeRates = {
-  USD: 5.12,
-  EUR: 5.68,
-  GBP: 6.61,
-  ARS: 0.0058,
-  COP: 0.00126,
-  MXN: 0.296,
-  fetchedAt: new Date().toISOString(),
+const RATES_CACHE_KEY = "gestorpro-exchange-rates-v2";
+const RATES_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+// Primary: AwesomeAPI — Brazilian-focused, B3/Banco Central data, updates ~15min, no key needed
+const AWESOMEAPI_URL =
+  "https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,GBP-BRL,ARS-BRL,COP-BRL,MXN-BRL";
+
+// Fallback: Frankfurter.app — ECB-based, free, no key, reliable CORS. Less granular for ARS/COP.
+const FRANKFURTER_URL = "https://api.frankfurter.app/latest?from=USD&to=BRL,EUR,GBP,ARS,MXN";
+
+/** Fallback rates — used ONLY if the API is unreachable */
+const FALLBACK_RATES: Record<string, Partial<LiveRate>> = {
+  USD: { rate: 5.15, bid: 5.14, ask: 5.16, high: 5.18, low: 5.12, varBid: "0", pctChange: "0" },
+  EUR: { rate: 5.72, bid: 5.71, ask: 5.73, high: 5.75, low: 5.68, varBid: "0", pctChange: "0" },
+  GBP: { rate: 6.65, bid: 6.64, ask: 6.66, high: 6.68, low: 6.60, varBid: "0", pctChange: "0" },
+  ARS: { rate: 0.0058, bid: 0.0057, ask: 0.0059, high: 0.006, low: 0.0055, varBid: "0", pctChange: "0" },
+  COP: { rate: 0.00126, bid: 0.00125, ask: 0.00127, high: 0.0013, low: 0.00122, varBid: "0", pctChange: "0" },
+  MXN: { rate: 0.296, bid: 0.295, ask: 0.297, high: 0.30, low: 0.292, varBid: "0", pctChange: "0" },
 };
 
-const MOCK_STRIPE_BALANCE: StripeBalance = {
-  // Acme Corp (USD $2,400) + other international clients
-  originalCurrency: "usd",
-  originalAvailable: 4800,       // $4,800 USD available in Stripe
-  exchangeRate: MOCK_EXCHANGE_RATES.USD,
-  availableBRL: 4800 * MOCK_EXCHANGE_RATES.USD,   // ≈ R$ 24.576
-  pendingBRL: 1200 * MOCK_EXCHANGE_RATES.USD,     // ≈ R$ 6.144 pending
-  lastSyncedAt: new Date().toISOString(),
-};
+// ─── EXCHANGE RATE FETCHER ───────────────────────────────────
 
-const MOCK_ASAAS_BALANCE: AsaasBalance = {
-  // Brazilian clients (BRL)
-  balanceBRL: 320424,     // R$ 320.424 in Asaas
-  lastSyncedAt: new Date().toISOString(),
-};
-
-const MOCK_SUMMARY: FinancialSummary = {
-  totalBalanceBRL: MOCK_ASAAS_BALANCE.balanceBRL + MOCK_STRIPE_BALANCE.availableBRL,
-  mrrBRL: 156000,
-  arrBRL: 156000 * 12,
-  receivableBRL: 248500,
-  overdueBRL: 32400,
-  receivedThisMonthBRL: 156200,
-  delinquencyRate: 4.8,
-  activeSubscriptions: 87,
-  stripe: MOCK_STRIPE_BALANCE,
-  asaas: MOCK_ASAAS_BALANCE,
-  exchangeRates: MOCK_EXCHANGE_RATES,
-  isLiveData: false,
-  lastRefreshedAt: new Date().toISOString(),
-};
-
-// ─── FETCH FUNCTION ────────────────────────────────────────
-// INTEGRATION POINT: Replace the mock return below with:
-//   const res = await fetch('/api/financial/summary');
-//   return res.json() as FinancialSummary;
-
-async function fetchFinancialSummary(): Promise<FinancialSummary> {
-  // TODO: Replace with real API call once backend is integrated.
-  // return fetch('/api/financial/summary').then(r => r.json());
-  return Promise.resolve(MOCK_SUMMARY);
+interface AwesomeApiEntry {
+  bid: string; ask: string; high: string; low: string;
+  varBid: string; pctChange: string; create_date: string;
 }
 
-// ─── REACT HOOK ────────────────────────────────────────────
-import { useState, useEffect } from "react";
+function parseLiveRate(entry: AwesomeApiEntry): LiveRate {
+  const bid = parseFloat(entry.bid);
+  return {
+    rate: bid,
+    bid,
+    ask: parseFloat(entry.ask),
+    high: parseFloat(entry.high),
+    low: parseFloat(entry.low),
+    varBid: entry.varBid,
+    pctChange: entry.pctChange,
+    quoteTime: entry.create_date,
+  };
+}
+
+function buildFallbackRates(): ExchangeRates {
+  const now = new Date().toISOString();
+  const make = (k: string): LiveRate => ({
+    rate: FALLBACK_RATES[k]!.rate!,
+    bid: FALLBACK_RATES[k]!.bid!,
+    ask: FALLBACK_RATES[k]!.ask!,
+    high: FALLBACK_RATES[k]!.high!,
+    low: FALLBACK_RATES[k]!.low!,
+    varBid: "0",
+    pctChange: "0",
+    quoteTime: now,
+  });
+  return {
+    USD: make("USD"), EUR: make("EUR"), GBP: make("GBP"),
+    ARS: make("ARS"), COP: make("COP"), MXN: make("MXN"),
+    fetchedAt: now,
+    isLive: false,
+    source: "fallback (API indisponível)",
+  };
+}
+
+async function fetchLiveRates(): Promise<ExchangeRates> {
+  // Check cache first
+  try {
+    const cached = sessionStorage.getItem(RATES_CACHE_KEY);
+    if (cached) {
+      const parsed: ExchangeRates = JSON.parse(cached);
+      const age = Date.now() - new Date(parsed.fetchedAt).getTime();
+      if (age < RATES_TTL_MS && parsed.isLive) return parsed;
+    }
+  } catch { /* ignore bad cache */ }
+
+  try {
+    const res = await fetch(AWESOMEAPI_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+
+    const rates: ExchangeRates = {
+      USD: parseLiveRate(json.USDBRL),
+      EUR: parseLiveRate(json.EURBRL),
+      GBP: parseLiveRate(json.GBPBRL),
+      ARS: parseLiveRate(json.ARSBRL),
+      COP: parseLiveRate(json.COPBRL),
+      MXN: parseLiveRate(json.MXNBRL),
+      fetchedAt: new Date().toISOString(),
+      isLive: true,
+      source: "AwesomeAPI (B3 / Banco Central)",
+    };
+
+    try { sessionStorage.setItem(RATES_CACHE_KEY, JSON.stringify(rates)); } catch { /* ignore */ }
+    return rates;
+  } catch {
+    // Return cached stale data if available, otherwise static fallback
+    try {
+      const stale = sessionStorage.getItem(RATES_CACHE_KEY);
+      if (stale) {
+        const parsed: ExchangeRates = JSON.parse(stale);
+        return { ...parsed, source: `${parsed.source} (cache desatualizado)` };
+      }
+    } catch { /* ignore */ }
+    return buildFallbackRates();
+  }
+}
+
+// ─── MOCK GATEWAY BALANCES ──────────────────────────────────
+// ⚠️  Replace fetchGatewayBalances() body with a real call once integrated.
+// See instructions at the top of this file.
+
+async function fetchGatewayBalances(rates: ExchangeRates): Promise<{
+  stripe: StripeBalance;
+  asaas: AsaasBalance;
+}> {
+  // TODO: Replace with:
+  //   const res = await fetch('/api/financial/summary');
+  //   const json = await res.json();
+  //   return { stripe: json.stripe, asaas: json.asaas };
+
+  const usdRate = rates.USD.rate;
+
+  const stripe: StripeBalance = {
+    originalCurrency: "usd",
+    originalAvailable: 4800,
+    exchangeRate: usdRate,
+    availableBRL: Math.round(4800 * usdRate),
+    pendingBRL: Math.round(1200 * usdRate),
+    lastSyncedAt: new Date().toISOString(),
+  };
+
+  const asaas: AsaasBalance = {
+    balanceBRL: 320424,
+    lastSyncedAt: new Date().toISOString(),
+  };
+
+  return { stripe, asaas };
+}
+
+// ─── COMBINED FETCH ─────────────────────────────────────────
+
+async function buildFinancialSummary(): Promise<FinancialSummary> {
+  const rates = await fetchLiveRates();
+  const { stripe, asaas } = await fetchGatewayBalances(rates);
+  const totalBalanceBRL = asaas.balanceBRL + stripe.availableBRL;
+
+  return {
+    totalBalanceBRL,
+    mrrBRL: 156000,
+    arrBRL: 156000 * 12,
+    receivableBRL: 248500,
+    overdueBRL: 32400,
+    receivedThisMonthBRL: 156200,
+    delinquencyRate: 4.8,
+    activeSubscriptions: 87,
+    stripe,
+    asaas,
+    exchangeRates: rates,
+    isLiveData: false, // set to true once Stripe + Asaas APIs are live
+    lastRefreshedAt: new Date().toISOString(),
+  };
+}
+
+// ─── HOOKS ──────────────────────────────────────────────────
 
 interface UseFinancialDataReturn {
   data: FinancialSummary | null;
@@ -191,25 +294,58 @@ interface UseFinancialDataReturn {
   refresh: () => void;
 }
 
+/** Auto-refreshes exchange rates every 15 min. */
 export function useFinancialData(): UseFinancialDataReturn {
   const [data, setData] = useState<FinancialSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     setLoading(true);
     setError(null);
-    fetchFinancialSummary()
+    buildFinancialSummary()
       .then(setData)
       .catch(err => setError(String(err)))
       .finally(() => setLoading(false));
-  }, [tick]);
+  }, []);
+
+  useEffect(() => {
+    load();
+    // Auto-refresh every 15 min to pick up new exchange rates
+    intervalRef.current = setInterval(load, RATES_TTL_MS);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [tick, load]);
 
   return { data, loading, error, refresh: () => setTick(t => t + 1) };
 }
 
-// ─── UTILITY ───────────────────────────────────────────────
+/** Lightweight hook for components that only need exchange rates (e.g. client creation form). */
+interface UseExchangeRatesReturn {
+  rates: ExchangeRates | null;
+  loading: boolean;
+  refresh: () => void;
+}
+
+export function useExchangeRates(): UseExchangeRatesReturn {
+  const [rates, setRates] = useState<ExchangeRates | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchLiveRates().then(r => { setRates(r); setLoading(false); });
+    const id = setInterval(() => {
+      fetchLiveRates().then(setRates);
+    }, RATES_TTL_MS);
+    return () => clearInterval(id);
+  }, [tick]);
+
+  return { rates, loading, refresh: () => setTick(t => t + 1) };
+}
+
+// ─── UTILITIES ──────────────────────────────────────────────
 
 export function fmtBRL(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
@@ -225,9 +361,14 @@ export function fmtBRLCompact(value: number): string {
   return fmtBRL(value);
 }
 
+export function fmtRate(rate: number): string {
+  return rate.toLocaleString("pt-BR", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+}
+
 export function convertToBRL(amount: number, currency: string, rates: ExchangeRates): number {
+  if (currency.toUpperCase() === "BRL") return amount;
   const key = currency.toUpperCase() as keyof ExchangeRates;
-  if (key === "BRL") return amount;
-  const rate = typeof rates[key] === "number" ? (rates[key] as number) : 1;
-  return amount * rate;
+  const entry = rates[key];
+  if (!entry || typeof entry !== "object" || !("rate" in entry)) return amount;
+  return amount * entry.rate;
 }

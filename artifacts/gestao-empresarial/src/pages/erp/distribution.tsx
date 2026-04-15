@@ -11,7 +11,7 @@ import {
   CircleDollarSign, Plus, RefreshCw, Save, Trash2,
   TrendingUp, Users, Wallet, AlertCircle, Zap,
 } from "lucide-react";
-import { useFinancialData, fmtBRL } from "@/lib/financial-data";
+import { useFinancialData, fmtBRL, fmtRate } from "@/lib/financial-data";
 
 // Re-export local reference to gateway meta without importing from client-config
 // to avoid circular deps. Colors are duplicated intentionally for self-containment.
@@ -165,47 +165,66 @@ export function DistributionPage() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
-          {[
-            {
-              gw: "asaas" as const,
-              label: "Asaas",
-              value: fin?.asaas.balanceBRL ?? 0,
-              sub: "Saldo disponível em R$",
-              extra: `Atualizado: ${fin ? new Date(fin.asaas.lastSyncedAt).toLocaleTimeString("pt-BR") : "—"}`,
-            },
-            {
-              gw: "stripe" as const,
-              label: "Stripe",
-              value: fin?.stripe.availableBRL ?? 0,
-              sub: `${fin?.stripe.originalCurrency.toUpperCase() ?? "USD"} ${(fin?.stripe.originalAvailable ?? 0).toLocaleString("en-US")} × ${fin?.stripe.exchangeRate.toFixed(2) ?? "—"} = BRL`,
-              extra: `Pendente: ${fmtBRL(fin?.stripe.pendingBRL ?? 0)}`,
-            },
-            {
-              gw: null,
-              label: "Total (BRL)",
-              value: fin?.totalBalanceBRL ?? 0,
-              sub: "Stripe + Asaas convertidos em R$",
-              extra: useGatewayBalance ? "✓ Sendo usado como receita base" : "Receita base ajustada manualmente",
-            },
-          ].map(({ gw, label, value, sub, extra }) => {
-            const g = gw ? GW[gw] : null;
-            return (
-              <div key={label} className={`p-4 ${g ? `${g.bg}` : "bg-muted/10"}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  {g ? (
-                    <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border ${g.color} ${g.bg} ${g.border}`}>{label}</span>
-                  ) : (
-                    <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border border-border bg-background text-foreground">TOTAL</span>
-                  )}
+          {/* Asaas */}
+          <div className={`p-4 ${GW.asaas.bg}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border ${GW.asaas.color} ${GW.asaas.bg} ${GW.asaas.border}`}>Asaas</span>
+            </div>
+            <p className={`text-2xl font-mono font-semibold ${loading ? "opacity-40" : ""} ${GW.asaas.color}`}>
+              {fmtBRL(fin?.asaas.balanceBRL ?? 0)}
+            </p>
+            <p className="text-[10px] text-muted-foreground mt-1">Saldo disponível em R$ (nativo)</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              Atualizado: {fin ? new Date(fin.asaas.lastSyncedAt).toLocaleTimeString("pt-BR") : "—"}
+            </p>
+          </div>
+
+          {/* Stripe */}
+          <div className={`p-4 ${GW.stripe.bg}`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border ${GW.stripe.color} ${GW.stripe.bg} ${GW.stripe.border}`}>Stripe</span>
+              {fin?.exchangeRates.isLive && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded border border-emerald-300 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-700 dark:text-emerald-400 font-mono">
+                  cotação ao vivo
+                </span>
+              )}
+            </div>
+            <p className={`text-2xl font-mono font-semibold ${loading ? "opacity-40" : ""} ${GW.stripe.color}`}>
+              {fmtBRL(fin?.stripe.availableBRL ?? 0)}
+            </p>
+            <div className="mt-1 space-y-0.5">
+              <p className="text-[10px] text-muted-foreground">
+                USD {(fin?.stripe.originalAvailable ?? 0).toLocaleString("en-US")} × R$ {fmtRate(fin?.stripe.exchangeRate ?? 0)}
+              </p>
+              {fin?.exchangeRates.USD && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-muted-foreground">
+                    bid {fmtRate(fin.exchangeRates.USD.bid)} · ask {fmtRate(fin.exchangeRates.USD.ask)}
+                  </span>
+                  <span className={`text-[10px] font-mono font-semibold ${parseFloat(fin.exchangeRates.USD.pctChange) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                    {parseFloat(fin.exchangeRates.USD.pctChange) >= 0 ? "+" : ""}{fin.exchangeRates.USD.pctChange}%
+                  </span>
                 </div>
-                <p className={`text-2xl font-mono font-semibold ${loading ? "opacity-40" : ""} ${g ? g.color : "text-foreground"}`}>
-                  {fmtBRL(value)}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-1">{sub}</p>
-                <p className={`text-[10px] mt-0.5 font-medium ${gw === null && useGatewayBalance ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>{extra}</p>
-              </div>
-            );
-          })}
+              )}
+              <p className="text-[10px] text-muted-foreground">
+                Pendente: {fmtBRL(fin?.stripe.pendingBRL ?? 0)} · Fonte: {fin?.exchangeRates.source ?? "—"}
+              </p>
+            </div>
+          </div>
+
+          {/* Total */}
+          <div className="p-4 bg-muted/10">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border border-border bg-background text-foreground">TOTAL</span>
+            </div>
+            <p className={`text-2xl font-mono font-semibold ${loading ? "opacity-40" : ""} text-foreground`}>
+              {fmtBRL(fin?.totalBalanceBRL ?? 0)}
+            </p>
+            <p className="text-[10px] text-muted-foreground mt-1">Stripe + Asaas convertidos em R$</p>
+            <p className={`text-[10px] mt-0.5 font-medium ${useGatewayBalance ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+              {useGatewayBalance ? "✓ Sendo usado como receita base" : "Receita base ajustada manualmente"}
+            </p>
+          </div>
         </div>
       </div>
 
