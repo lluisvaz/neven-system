@@ -26,9 +26,6 @@ const navigation: NavEntry[] = [
   {
     name: "ERP", items: [
       { name: "Clientes", href: "/erp/clients", icon: Building2 },
-      { name: "A Receber", href: "/erp/receivables", icon: ArrowDownLeft },
-      { name: "A Pagar", href: "/erp/payables", icon: ArrowUpRight },
-      { name: "Fluxo de Caixa", href: "/erp/cashflow", icon: TrendingUp },
       { name: "Distribuição", href: "/erp/distribution", icon: Truck },
       { name: "Produtos", href: "/erp/products", icon: Package },
       { name: "Contratos", href: "/erp/contracts", icon: FileCheck2 },
@@ -36,9 +33,12 @@ const navigation: NavEntry[] = [
   },
   {
     name: "Faturamento", items: [
-      { name: "Visão Geral", href: "/billing", icon: LayoutDashboard },
-      { name: "Nova Cobrança", href: "/billing/new", icon: Plus },
-      { name: "Assinaturas", href: "/billing/subscriptions", icon: RefreshCw },
+      { name: "Visão Geral",    href: "/billing",                icon: LayoutDashboard },
+      { name: "A Receber",      href: "/billing/receivables",    icon: ArrowDownLeft },
+      { name: "A Pagar",        href: "/billing/payables",       icon: ArrowUpRight },
+      { name: "Fluxo de Caixa", href: "/billing/cashflow",       icon: TrendingUp },
+      { name: "Assinaturas",    href: "/billing/subscriptions",  icon: RefreshCw },
+      { name: "Nova Cobrança",  href: "/billing/new",            icon: Plus },
     ]
   },
   {

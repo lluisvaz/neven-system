@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,15 +10,10 @@ import { ContactsPage } from "@/pages/crm/contacts";
 import { ContactDetailPage } from "@/pages/crm/contact-detail";
 import { ActivitiesPage } from "@/pages/crm/activities";
 import { ClientsPage } from "@/pages/erp/clients";
-import { ReceivablesPage } from "@/pages/erp/receivables";
-import { PayablesPage } from "@/pages/erp/payables";
-import { CashflowPage } from "@/pages/erp/cashflow";
 import { DistributionPage } from "@/pages/erp/distribution";
 import { ProductsPage } from "@/pages/erp/products";
 import { ContractsPage } from "@/pages/erp/contracts";
-import { BillingDashboardPage } from "@/pages/billing/billing-dashboard";
-import { NewChargePage } from "@/pages/billing/new-charge";
-import { SubscriptionsPage } from "@/pages/billing/subscriptions";
+import { BillingPage } from "@/pages/billing/billing-page";
 import { TicketsPage } from "@/pages/support/tickets";
 import { TicketDetailPage } from "@/pages/support/ticket-detail";
 import { SettingsCompanyPage } from "@/pages/settings/settings-company";
@@ -46,16 +41,19 @@ function Router() {
       <Route path="/crm/activities"><AdminLayout><ActivitiesPage /></AdminLayout></Route>
 
       <Route path="/erp/clients"><AdminLayout><ClientsPage /></AdminLayout></Route>
-      <Route path="/erp/receivables"><AdminLayout><ReceivablesPage /></AdminLayout></Route>
-      <Route path="/erp/payables"><AdminLayout><PayablesPage /></AdminLayout></Route>
-      <Route path="/erp/cashflow"><AdminLayout><CashflowPage /></AdminLayout></Route>
+      <Route path="/erp/receivables"><Redirect to="/billing/receivables" /></Route>
+      <Route path="/erp/payables"><Redirect to="/billing/payables" /></Route>
+      <Route path="/erp/cashflow"><Redirect to="/billing/cashflow" /></Route>
       <Route path="/erp/distribution"><AdminLayout><DistributionPage /></AdminLayout></Route>
       <Route path="/erp/products"><AdminLayout><ProductsPage /></AdminLayout></Route>
       <Route path="/erp/contracts"><AdminLayout><ContractsPage /></AdminLayout></Route>
 
-      <Route path="/billing"><AdminLayout><BillingDashboardPage /></AdminLayout></Route>
-      <Route path="/billing/new"><AdminLayout><NewChargePage /></AdminLayout></Route>
-      <Route path="/billing/subscriptions"><AdminLayout><SubscriptionsPage /></AdminLayout></Route>
+      <Route path="/billing"><AdminLayout><BillingPage /></AdminLayout></Route>
+      <Route path="/billing/receivables"><AdminLayout><BillingPage /></AdminLayout></Route>
+      <Route path="/billing/payables"><AdminLayout><BillingPage /></AdminLayout></Route>
+      <Route path="/billing/cashflow"><AdminLayout><BillingPage /></AdminLayout></Route>
+      <Route path="/billing/subscriptions"><AdminLayout><BillingPage /></AdminLayout></Route>
+      <Route path="/billing/new"><AdminLayout><BillingPage /></AdminLayout></Route>
 
       <Route path="/support/tickets"><AdminLayout><TicketsPage /></AdminLayout></Route>
       <Route path="/support/tickets/:id"><AdminLayout><TicketDetailPage /></AdminLayout></Route>
