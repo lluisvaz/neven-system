@@ -11,6 +11,7 @@ import { ContactDetailPage } from "@/pages/crm/contact-detail";
 import { PipelinePage } from "@/pages/crm/pipeline";
 import { ActivitiesPage } from "@/pages/crm/activities";
 import { AutomationsPage } from "@/pages/crm/automations";
+import { ClientsPage } from "@/pages/erp/clients";
 import { ReceivablesPage } from "@/pages/erp/receivables";
 import { PayablesPage } from "@/pages/erp/payables";
 import { CashflowPage } from "@/pages/erp/cashflow";
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/crm/activities"><AdminLayout><ActivitiesPage /></AdminLayout></Route>
       <Route path="/crm/automations"><AdminLayout><AutomationsPage /></AdminLayout></Route>
 
+      <Route path="/erp/clients"><AdminLayout><ClientsPage /></AdminLayout></Route>
       <Route path="/erp/receivables"><AdminLayout><ReceivablesPage /></AdminLayout></Route>
       <Route path="/erp/payables"><AdminLayout><PayablesPage /></AdminLayout></Route>
       <Route path="/erp/cashflow"><AdminLayout><CashflowPage /></AdminLayout></Route>
