@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -62,24 +61,6 @@ export function PortalProfilePage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">País</Label>
-              <Select defaultValue="br">
-                <SelectTrigger className="rounded-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="br">🇧🇷 Brasil</SelectItem>
-                  <SelectItem value="us">🇺🇸 Estados Unidos</SelectItem>
-                  <SelectItem value="pt">🇵🇹 Portugal</SelectItem>
-                  <SelectItem value="ar">🇦🇷 Argentina</SelectItem>
-                  <SelectItem value="mx">🇲🇽 México</SelectItem>
-                  <SelectItem value="gb">🇬🇧 Reino Unido</SelectItem>
-                  <SelectItem value="de">🇩🇪 Alemanha</SelectItem>
-                  <SelectItem value="fr">🇫🇷 França</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Idioma</Label>
               <Select defaultValue="pt-br">
                 <SelectTrigger className="rounded-sm">
@@ -96,74 +77,6 @@ export function PortalProfilePage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Moeda</Label>
-              <Select defaultValue="brl">
-                <SelectTrigger className="rounded-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="brl">BRL — Real Brasileiro (R$)</SelectItem>
-                  <SelectItem value="usd">USD — Dólar Americano ($)</SelectItem>
-                  <SelectItem value="eur">EUR — Euro (€)</SelectItem>
-                  <SelectItem value="gbp">GBP — Libra Esterlina (£)</SelectItem>
-                  <SelectItem value="ars">ARS — Peso Argentino ($)</SelectItem>
-                  <SelectItem value="mxn">MXN — Peso Mexicano ($)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Fuso Horário</Label>
-              <Select defaultValue="america-sao_paulo">
-                <SelectTrigger className="rounded-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="america-sao_paulo">America/São_Paulo (UTC-3)</SelectItem>
-                  <SelectItem value="america-new_york">America/New_York (UTC-5)</SelectItem>
-                  <SelectItem value="america-los_angeles">America/Los_Angeles (UTC-8)</SelectItem>
-                  <SelectItem value="europe-london">Europe/London (UTC+0)</SelectItem>
-                  <SelectItem value="europe-berlin">Europe/Berlin (UTC+1)</SelectItem>
-                  <SelectItem value="europe-paris">Europe/Paris (UTC+1)</SelectItem>
-                  <SelectItem value="america-buenos_aires">America/Buenos_Aires (UTC-3)</SelectItem>
-                  <SelectItem value="america-mexico_city">America/Mexico_City (UTC-6)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <Label className="text-xs uppercase tracking-wider text-muted-foreground">Métodos de Pagamento Aceitos</Label>
-            <div className="flex flex-wrap gap-2">
-              {["PIX", "Cartão de Crédito", "Boleto Bancário", "Transferência"].map((method) => (
-                <label key={method} className="flex items-center gap-2 bg-muted/40 border border-border rounded-sm px-3 py-1.5 cursor-pointer hover:bg-muted transition-colors">
-                  <input type="checkbox" className="rounded-sm" defaultChecked={["PIX", "Cartão de Crédito", "Boleto Bancário"].includes(method)} />
-                  <span className="text-xs font-mono">{method}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-6">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
-            Notificações
-          </h2>
-          <div className="space-y-4 bg-muted/30 p-6 rounded-sm border border-border">
-            {[
-              { id: "pref1", label: "Lembretes de cobrança por e-mail", desc: "Avisos 5 dias antes e no dia do vencimento", checked: true },
-              { id: "pref2", label: "Lembretes de cobrança por WhatsApp", desc: "Avisos rápidos direto no celular cadastrado", checked: true },
-              { id: "pref3", label: "Atualizações de chamados", desc: "Sempre que houver resposta ou mudança de status", checked: true },
-              { id: "pref4", label: "Comunicados e novidades da plataforma", desc: "Atualizações de produto, webinars e newsletters", checked: false },
-            ].map((pref, i) => (
-              <div key={i} className="flex items-start justify-between py-2">
-                <div className="space-y-1">
-                  <Label htmlFor={pref.id} className="text-sm font-medium cursor-pointer">{pref.label}</Label>
-                  <p className="text-xs text-muted-foreground">{pref.desc}</p>
-                </div>
-                <Switch id={pref.id} defaultChecked={pref.checked} data-testid={`switch-pref-${i}`} className="mt-1" />
-              </div>
-            ))}
           </div>
         </section>
 
