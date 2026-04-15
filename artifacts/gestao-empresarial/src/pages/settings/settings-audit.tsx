@@ -3,15 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Users, Puzzle, Shield, Download, Search } from "lucide-react";
-import { Link, useLocation } from "wouter";
-
-const settingsNav = [
-  { name: "Empresa", href: "/settings", icon: Building2 },
-  { name: "Usuários", href: "/settings/users", icon: Users },
-  { name: "Integrações", href: "/settings/integrations", icon: Puzzle },
-  { name: "Auditoria", href: "/settings/audit", icon: Shield },
-];
+import { Download, Search } from "lucide-react";
 
 const auditLogs = [
   { id: 1, date: "15/04/2026", time: "16:32:45", user: "Maria Santos", action: "Edição", module: "CRM", detail: "Contato 'João Silva' - status alterado: Prospect → Cliente Ativo", ip: "189.100.12.45" },
@@ -35,30 +27,11 @@ const actionBadge: Record<string, "default" | "secondary" | "outline" | "destruc
 };
 
 export function SettingsAuditPage() {
-  const [location] = useLocation();
-
   return (
     <div className="space-y-8 max-w-5xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Configurações</h1>
-          <p className="text-sm font-mono text-muted-foreground mt-1">Registro de atividades para conformidade</p>
-        </div>
-      </div>
-
-      <div className="flex gap-6 border-b border-border pb-px overflow-x-auto hide-scrollbar">
-        {settingsNav.map(nav => {
-          const isActive = location === nav.href;
-          return (
-            <Link key={nav.name} href={nav.href}>
-              <div className={`flex items-center gap-2 pb-3 text-sm font-medium uppercase tracking-wider border-b-2 transition-colors cursor-pointer whitespace-nowrap
-                ${isActive ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
-                <nav.icon className="w-4 h-4" />
-                {nav.name}
-              </div>
-            </Link>
-          );
-        })}
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Auditoria</h1>
+        <p className="text-sm font-mono text-muted-foreground mt-1">Registro de atividades para conformidade</p>
       </div>
 
       <div className="flex gap-3 items-center">

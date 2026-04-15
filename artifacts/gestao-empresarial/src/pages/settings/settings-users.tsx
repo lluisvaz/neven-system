@@ -2,15 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Building2, Users, Puzzle, Shield, Plus, MoreHorizontal } from "lucide-react";
-import { Link, useLocation } from "wouter";
-
-const settingsNav = [
-  { name: "Empresa", href: "/settings", icon: Building2 },
-  { name: "Usuários", href: "/settings/users", icon: Users },
-  { name: "Integrações", href: "/settings/integrations", icon: Puzzle },
-  { name: "Auditoria", href: "/settings/audit", icon: Shield },
-];
+import { Plus, MoreHorizontal } from "lucide-react";
 
 const users = [
   { id: 1, name: "Maria Santos", email: "maria@gestorpro.com.br", role: "Admin", department: "Diretoria", lastAccess: "15/04/2026", status: "Ativo" },
@@ -30,31 +22,14 @@ const roleBadge: Record<string, "default" | "secondary" | "outline"> = {
 };
 
 export function SettingsUsersPage() {
-  const [location] = useLocation();
-
   return (
     <div className="space-y-8 max-w-5xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Configurações</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Usuários</h1>
           <p className="text-sm font-mono text-muted-foreground mt-1">Gerencie acessos e permissões</p>
         </div>
         <Button size="sm" className="rounded-sm"><Plus className="w-3.5 h-3.5 mr-2" />Convidar Usuário</Button>
-      </div>
-
-      <div className="flex gap-6 border-b border-border pb-px overflow-x-auto hide-scrollbar">
-        {settingsNav.map(nav => {
-          const isActive = location === nav.href;
-          return (
-            <Link key={nav.name} href={nav.href}>
-              <div className={`flex items-center gap-2 pb-3 text-sm font-medium uppercase tracking-wider border-b-2 transition-colors cursor-pointer whitespace-nowrap
-                ${isActive ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
-                <nav.icon className="w-4 h-4" />
-                {nav.name}
-              </div>
-            </Link>
-          );
-        })}
       </div>
 
       <div className="border border-border rounded-sm overflow-hidden">

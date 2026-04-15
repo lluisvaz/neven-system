@@ -10,17 +10,12 @@ import { CrmPage } from "@/pages/crm/crm-page";
 import { ErpPage } from "@/pages/erp/erp-page";
 import { BillingPage } from "@/pages/billing/billing-page";
 import { SupportPage } from "@/pages/support/support-page";
-import { SettingsCompanyPage } from "@/pages/settings/settings-company";
-import { SettingsUsersPage } from "@/pages/settings/settings-users";
-import { SettingsIntegrationsPage } from "@/pages/settings/settings-integrations";
-import { SettingsAuditPage } from "@/pages/settings/settings-audit";
+import { SettingsPage } from "@/pages/settings/settings-page";
 import { PortalDashboardPage } from "@/pages/portal/portal-dashboard";
 import { PortalInvoicesPage } from "@/pages/portal/portal-invoices";
 import { PortalTicketsPage } from "@/pages/portal/portal-tickets";
 import { PortalDocumentsPage } from "@/pages/portal/portal-documents";
 import { PortalProfilePage } from "@/pages/portal/portal-profile";
-import { OnboardingPage } from "@/pages/onboarding";
-import { ProposalsPage } from "@/pages/proposals";
 
 const queryClient = new QueryClient();
 
@@ -36,9 +31,9 @@ function Router() {
       <Route path="/communications"><Redirect to="/crm/communications" /></Route>
 
       <Route path="/erp/clients"><AdminLayout><ErpPage /></AdminLayout></Route>
-      <Route path="/erp/distribution"><AdminLayout><ErpPage /></AdminLayout></Route>
       <Route path="/erp/products"><AdminLayout><ErpPage /></AdminLayout></Route>
       <Route path="/erp/contracts"><AdminLayout><ErpPage /></AdminLayout></Route>
+      <Route path="/erp/distribution"><Redirect to="/settings/distribution" /></Route>
       <Route path="/erp/receivables"><Redirect to="/billing/receivables" /></Route>
       <Route path="/erp/payables"><Redirect to="/billing/payables" /></Route>
       <Route path="/erp/cashflow"><Redirect to="/billing/cashflow" /></Route>
@@ -53,13 +48,13 @@ function Router() {
       <Route path="/support/tickets"><AdminLayout><SupportPage /></AdminLayout></Route>
       <Route path="/support/tickets/:id"><AdminLayout><SupportPage /></AdminLayout></Route>
 
-      <Route path="/settings"><AdminLayout><SettingsCompanyPage /></AdminLayout></Route>
-      <Route path="/settings/users"><AdminLayout><SettingsUsersPage /></AdminLayout></Route>
-      <Route path="/settings/integrations"><AdminLayout><SettingsIntegrationsPage /></AdminLayout></Route>
-      <Route path="/settings/audit"><AdminLayout><SettingsAuditPage /></AdminLayout></Route>
-
-      <Route path="/onboarding"><AdminLayout><OnboardingPage /></AdminLayout></Route>
-      <Route path="/proposals"><AdminLayout><ProposalsPage /></AdminLayout></Route>
+      <Route path="/settings"><Redirect to="/settings/profile" /></Route>
+      <Route path="/settings/profile"><AdminLayout><SettingsPage /></AdminLayout></Route>
+      <Route path="/settings/company"><AdminLayout><SettingsPage /></AdminLayout></Route>
+      <Route path="/settings/users"><AdminLayout><SettingsPage /></AdminLayout></Route>
+      <Route path="/settings/distribution"><AdminLayout><SettingsPage /></AdminLayout></Route>
+      <Route path="/settings/integrations"><AdminLayout><SettingsPage /></AdminLayout></Route>
+      <Route path="/settings/audit"><AdminLayout><SettingsPage /></AdminLayout></Route>
 
       <Route path="/portal"><PortalLayout><PortalDashboardPage /></PortalLayout></Route>
       <Route path="/portal/invoices"><PortalLayout><PortalInvoicesPage /></PortalLayout></Route>

@@ -1,13 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Building2, Users, Puzzle, Shield } from "lucide-react";
-import { Link, useLocation } from "wouter";
-
-const settingsNav = [
-  { name: "Empresa", href: "/settings", icon: Building2 },
-  { name: "Usuários", href: "/settings/users", icon: Users },
-  { name: "Integrações", href: "/settings/integrations", icon: Puzzle },
-  { name: "Auditoria", href: "/settings/audit", icon: Shield },
-];
 
 type Integration = {
   id: number;
@@ -87,30 +78,11 @@ const integrations: Integration[] = [
 ];
 
 export function SettingsIntegrationsPage() {
-  const [location] = useLocation();
-
   return (
     <div className="space-y-8 max-w-5xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Configurações</h1>
-          <p className="text-sm font-mono text-muted-foreground mt-1">Conecte o GestorPro a outros serviços</p>
-        </div>
-      </div>
-
-      <div className="flex gap-6 border-b border-border pb-px overflow-x-auto hide-scrollbar">
-        {settingsNav.map(nav => {
-          const isActive = location === nav.href;
-          return (
-            <Link key={nav.name} href={nav.href}>
-              <div className={`flex items-center gap-2 pb-3 text-sm font-medium uppercase tracking-wider border-b-2 transition-colors cursor-pointer whitespace-nowrap
-                ${isActive ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
-                <nav.icon className="w-4 h-4" />
-                {nav.name}
-              </div>
-            </Link>
-          );
-        })}
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Integrações</h1>
+        <p className="text-sm font-mono text-muted-foreground mt-1">Conecte o GestorPro a outros serviços</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

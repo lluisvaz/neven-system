@@ -1,14 +1,12 @@
 import { Link, useLocation } from "wouter";
 import { ClientsPage } from "./clients";
-import { DistributionPage } from "./distribution";
 import { ProductsPage } from "./products";
 import { ContractsPage } from "./contracts";
 
 const tabs = [
-  { label: "Clientes",     path: "/erp/clients" },
-  { label: "Distribuição", path: "/erp/distribution" },
-  { label: "Produtos",     path: "/erp/products" },
-  { label: "Contratos",    path: "/erp/contracts" },
+  { label: "Clientes",  path: "/erp/clients" },
+  { label: "Produtos",  path: "/erp/products" },
+  { label: "Contratos", path: "/erp/contracts" },
 ];
 
 export function ErpPage() {
@@ -42,10 +40,9 @@ export function ErpPage() {
       </div>
 
       <div>
-        {activeTab.path === "/erp/clients"      && <ClientsPage />}
-        {activeTab.path === "/erp/distribution" && <DistributionPage />}
-        {activeTab.path === "/erp/products"     && <ProductsPage />}
-        {activeTab.path === "/erp/contracts"    && <ContractsPage />}
+        {activeTab.path === "/erp/clients"   && <ClientsPage />}
+        {activeTab.path === "/erp/products"  && <ProductsPage />}
+        {activeTab.path === "/erp/contracts" && <ContractsPage />}
       </div>
     </div>
   );

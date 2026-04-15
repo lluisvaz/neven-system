@@ -2,39 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Users, Puzzle, Shield } from "lucide-react";
-import { Link, useLocation } from "wouter";
-
-const settingsNav = [
-  { name: "Empresa", href: "/settings", icon: Building2 },
-  { name: "Usuários", href: "/settings/users", icon: Users },
-  { name: "Integrações", href: "/settings/integrations", icon: Puzzle },
-  { name: "Auditoria", href: "/settings/audit", icon: Shield },
-];
-
 export function SettingsCompanyPage() {
-  const [location] = useLocation();
-
   return (
     <div className="space-y-8 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Configurações</h1>
-        <p className="text-sm font-mono text-muted-foreground mt-1">Gerencie as preferências da sua conta</p>
-      </div>
-
-      <div className="flex gap-6 border-b border-border pb-px overflow-x-auto hide-scrollbar">
-        {settingsNav.map(nav => {
-          const isActive = location === nav.href;
-          return (
-            <Link key={nav.name} href={nav.href}>
-              <div className={`flex items-center gap-2 pb-3 text-sm font-medium uppercase tracking-wider border-b-2 transition-colors cursor-pointer whitespace-nowrap
-                ${isActive ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
-                <nav.icon className="w-4 h-4" />
-                {nav.name}
-              </div>
-            </Link>
-          );
-        })}
+        <h1 className="text-2xl font-semibold tracking-tight">Empresa</h1>
+        <p className="text-sm font-mono text-muted-foreground mt-1">Identidade visual e dados cadastrais da empresa</p>
       </div>
 
       <div className="space-y-10">

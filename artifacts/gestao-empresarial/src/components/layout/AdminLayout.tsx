@@ -3,9 +3,9 @@ import { Link, useLocation } from "wouter";
 import {
   Briefcase, FileText, Settings, ChevronRight, Menu, X,
   LayoutDashboard, Users, CheckSquare, Building2,
-  ArrowDownLeft, ArrowUpRight, TrendingUp, Truck, Package,
-  FileCheck2, CreditCard, RefreshCw, LifeBuoy, Rocket,
-  MessageSquare, FileCheck, Plus
+  ArrowDownLeft, ArrowUpRight, TrendingUp, Package,
+  FileCheck2, RefreshCw, LifeBuoy,
+  MessageSquare, Plus
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -25,9 +25,8 @@ const navigation: NavEntry[] = [
   },
   {
     name: "ERP", items: [
-      { name: "Clientes", href: "/erp/clients", icon: Building2 },
-      { name: "Distribuição", href: "/erp/distribution", icon: Truck },
-      { name: "Produtos", href: "/erp/products", icon: Package },
+      { name: "Clientes",  href: "/erp/clients",   icon: Building2 },
+      { name: "Produtos",  href: "/erp/products",  icon: Package },
       { name: "Contratos", href: "/erp/contracts", icon: FileCheck2 },
     ]
   },
@@ -46,8 +45,6 @@ const navigation: NavEntry[] = [
       { name: "Tickets", href: "/support/tickets", icon: LifeBuoy },
     ]
   },
-  { name: "Propostas", href: "/proposals", icon: FileCheck, single: true },
-  { name: "Onboarding", href: "/onboarding", icon: Rocket, single: true },
   { name: "Configurações", href: "/settings", icon: Settings, single: true },
 ];
 
