@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function PortalProfilePage() {
   return (
@@ -14,8 +15,9 @@ export function PortalProfilePage() {
 
       <div className="space-y-10">
         <section className="space-y-6">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">Informações Pessoais</h2>
-          
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+            Informações Pessoais
+          </h2>
           <div className="flex flex-col md:flex-row gap-8 items-start">
             <div className="flex flex-col items-center gap-3">
               <Avatar className="w-24 h-24 rounded-sm border border-border">
@@ -48,21 +50,111 @@ export function PortalProfilePage() {
               <div className="space-y-2 max-w-[50%]">
                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">CPF</Label>
                 <Input defaultValue="123.456.789-00" disabled className="rounded-sm font-mono opacity-60 bg-muted/50 cursor-not-allowed" />
-                <p className="text-[10px] text-muted-foreground">O CPF é usado para fins contratuais e não pode ser alterado diretamente.</p>
+                <p className="text-[10px] text-muted-foreground">Usado para fins contratuais. Não pode ser alterado diretamente.</p>
               </div>
             </div>
           </div>
         </section>
 
         <section className="space-y-6">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">Notificações</h2>
-          
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+            Preferências de Localização
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">País</Label>
+              <Select defaultValue="br">
+                <SelectTrigger className="rounded-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="br">🇧🇷 Brasil</SelectItem>
+                  <SelectItem value="us">🇺🇸 Estados Unidos</SelectItem>
+                  <SelectItem value="pt">🇵🇹 Portugal</SelectItem>
+                  <SelectItem value="ar">🇦🇷 Argentina</SelectItem>
+                  <SelectItem value="mx">🇲🇽 México</SelectItem>
+                  <SelectItem value="gb">🇬🇧 Reino Unido</SelectItem>
+                  <SelectItem value="de">🇩🇪 Alemanha</SelectItem>
+                  <SelectItem value="fr">🇫🇷 França</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Idioma</Label>
+              <Select defaultValue="pt-br">
+                <SelectTrigger className="rounded-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pt-br">Português (Brasil)</SelectItem>
+                  <SelectItem value="pt-pt">Português (Portugal)</SelectItem>
+                  <SelectItem value="en-us">English (US)</SelectItem>
+                  <SelectItem value="en-gb">English (UK)</SelectItem>
+                  <SelectItem value="es">Español</SelectItem>
+                  <SelectItem value="fr">Français</SelectItem>
+                  <SelectItem value="de">Deutsch</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Moeda</Label>
+              <Select defaultValue="brl">
+                <SelectTrigger className="rounded-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="brl">BRL — Real Brasileiro (R$)</SelectItem>
+                  <SelectItem value="usd">USD — Dólar Americano ($)</SelectItem>
+                  <SelectItem value="eur">EUR — Euro (€)</SelectItem>
+                  <SelectItem value="gbp">GBP — Libra Esterlina (£)</SelectItem>
+                  <SelectItem value="ars">ARS — Peso Argentino ($)</SelectItem>
+                  <SelectItem value="mxn">MXN — Peso Mexicano ($)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Fuso Horário</Label>
+              <Select defaultValue="america-sao_paulo">
+                <SelectTrigger className="rounded-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="america-sao_paulo">America/São_Paulo (UTC-3)</SelectItem>
+                  <SelectItem value="america-new_york">America/New_York (UTC-5)</SelectItem>
+                  <SelectItem value="america-los_angeles">America/Los_Angeles (UTC-8)</SelectItem>
+                  <SelectItem value="europe-london">Europe/London (UTC+0)</SelectItem>
+                  <SelectItem value="europe-berlin">Europe/Berlin (UTC+1)</SelectItem>
+                  <SelectItem value="europe-paris">Europe/Paris (UTC+1)</SelectItem>
+                  <SelectItem value="america-buenos_aires">America/Buenos_Aires (UTC-3)</SelectItem>
+                  <SelectItem value="america-mexico_city">America/Mexico_City (UTC-6)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">Métodos de Pagamento Aceitos</Label>
+            <div className="flex flex-wrap gap-2">
+              {["PIX", "Cartão de Crédito", "Boleto Bancário", "Transferência"].map((method) => (
+                <label key={method} className="flex items-center gap-2 bg-muted/40 border border-border rounded-sm px-3 py-1.5 cursor-pointer hover:bg-muted transition-colors">
+                  <input type="checkbox" className="rounded-sm" defaultChecked={["PIX", "Cartão de Crédito", "Boleto Bancário"].includes(method)} />
+                  <span className="text-xs font-mono">{method}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-6">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+            Notificações
+          </h2>
           <div className="space-y-4 bg-muted/30 p-6 rounded-sm border border-border">
             {[
-              { id: "pref1", label: "Receber lembretes de cobrança por e-mail", desc: "Avisos 5 dias antes e no dia do vencimento", checked: true },
-              { id: "pref2", label: "Receber lembretes de cobrança por WhatsApp", desc: "Avisos rápidos direto no celular cadastrado", checked: true },
-              { id: "pref3", label: "Notificações de atualização de chamados", desc: "Sempre que houver resposta ou mudança de status", checked: true },
-              { id: "pref4", label: "Receber comunicados e novidades da plataforma", desc: "Atualizações de produto, webinars e newsletters", checked: false },
+              { id: "pref1", label: "Lembretes de cobrança por e-mail", desc: "Avisos 5 dias antes e no dia do vencimento", checked: true },
+              { id: "pref2", label: "Lembretes de cobrança por WhatsApp", desc: "Avisos rápidos direto no celular cadastrado", checked: true },
+              { id: "pref3", label: "Atualizações de chamados", desc: "Sempre que houver resposta ou mudança de status", checked: true },
+              { id: "pref4", label: "Comunicados e novidades da plataforma", desc: "Atualizações de produto, webinars e newsletters", checked: false },
             ].map((pref, i) => (
               <div key={i} className="flex items-start justify-between py-2">
                 <div className="space-y-1">
@@ -76,8 +168,9 @@ export function PortalProfilePage() {
         </section>
 
         <section className="space-y-6">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">Segurança</h2>
-          
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+            Segurança
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="space-y-2">
@@ -94,14 +187,14 @@ export function PortalProfilePage() {
               </div>
               <Button variant="outline" size="sm" className="rounded-sm w-full">Atualizar Senha</Button>
             </div>
-            
+
             <div className="bg-muted/30 p-4 border border-border rounded-sm flex flex-col justify-center text-center items-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center border border-border">
+              <div className="w-12 h-12 rounded-sm bg-muted flex items-center justify-center border border-border">
                 <span className="text-xl">📱</span>
               </div>
               <div>
-                <h3 className="text-sm font-medium">Autenticação em 2 Fatores (2FA)</h3>
-                <p className="text-xs text-muted-foreground mt-1 px-4">Aumente a segurança da sua conta exigindo um código no celular ao fazer login.</p>
+                <h3 className="text-sm font-medium">Autenticação em 2 Fatores</h3>
+                <p className="text-xs text-muted-foreground mt-1 px-4">Aumente a segurança exigindo um código no celular ao fazer login.</p>
               </div>
               <Button variant="secondary" size="sm" className="rounded-sm text-xs mt-2">Configurar 2FA</Button>
             </div>

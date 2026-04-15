@@ -7,19 +7,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Send, MessageSquare } from "lucide-react";
-import { Link } from "wouter";
 
 const tickets = [
-  { id: "TKT-1042", title: "Erro ao gerar relatório DRE", category: "Bug", priority: "Alta", status: "Em andamento", created: "14/04/2026", updated: "Hoje às 10:30" },
+  { id: "TKT-1042", title: "Dúvida sobre integração da API de pagamentos", category: "Dúvida", priority: "Alta", status: "Em andamento", created: "14/04/2026", updated: "Hoje às 10:30" },
   { id: "TKT-1035", title: "Dúvida sobre limites da API", category: "Dúvida", priority: "Baixa", status: "Resolvido", created: "02/04/2026", updated: "03/04/2026" },
   { id: "TKT-1028", title: "Solicitação de novos relatórios", category: "Solicitação", priority: "Média", status: "Fechado", created: "20/03/2026", updated: "25/03/2026" },
   { id: "TKT-1015", title: "Dificuldade na emissão de nota fiscal", category: "Dúvida", priority: "Média", status: "Fechado", created: "05/03/2026", updated: "06/03/2026" },
 ];
 
-const statusBadge: Record<string, "default" | "secondary" | "outline"> = { 
-  "Em andamento": "secondary", 
-  Resolvido: "default", 
-  Fechado: "outline" 
+const statusBadge: Record<string, "default" | "secondary" | "outline"> = {
+  "Em andamento": "secondary",
+  Resolvido: "default",
+  Fechado: "outline",
 };
 
 export function PortalTicketsPage() {
@@ -33,7 +32,8 @@ export function PortalTicketsPage() {
           <p className="text-sm font-mono text-muted-foreground mt-1">Acompanhe e abra solicitações de suporte</p>
         </div>
         <Button size="sm" onClick={() => setShowForm(!showForm)} className="rounded-sm" disabled={showForm}>
-          <Plus className="w-3.5 h-3.5 mr-2" />Novo Chamado
+          <Plus className="w-3.5 h-3.5 mr-2" />
+          Novo Chamado
         </Button>
       </div>
 
@@ -41,15 +41,17 @@ export function PortalTicketsPage() {
         <div className="border border-border rounded-sm bg-card p-6 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold">Abrir Solicitação</h2>
-            <Button variant="ghost" size="sm" className="rounded-sm text-muted-foreground" onClick={() => setShowForm(false)}>Cancelar</Button>
+            <Button variant="ghost" size="sm" className="rounded-sm text-muted-foreground" onClick={() => setShowForm(false)}>
+              Cancelar
+            </Button>
           </div>
-          
+
           <div className="space-y-6">
             <div className="space-y-2">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Assunto Principal</Label>
               <Input placeholder="Descreva brevemente o problema ou necessidade" className="rounded-sm" data-testid="input-ticket-subject" />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">Categoria</Label>
@@ -79,19 +81,22 @@ export function PortalTicketsPage() {
                 </Select>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Descrição Detalhada</Label>
-              <Textarea 
-                placeholder="Descreva com o máximo de detalhes possível o que está acontecendo..." 
-                className="rounded-sm min-h-[120px] resize-none" 
+              <Textarea
+                placeholder="Descreva com o máximo de detalhes possível o que está acontecendo..."
+                className="rounded-sm min-h-[120px] resize-none"
               />
-              <p className="text-[10px] text-muted-foreground">Inclua passos para reproduzir, mensagens de erro exatas ou qualquer informação relevante.</p>
+              <p className="text-[10px] text-muted-foreground">
+                Inclua passos para reproduzir, mensagens de erro exatas ou qualquer informação relevante.
+              </p>
             </div>
-            
+
             <div className="flex justify-end pt-2">
               <Button className="rounded-sm px-8">
-                <Send className="w-3.5 h-3.5 mr-2" />Enviar Solicitação
+                <Send className="w-3.5 h-3.5 mr-2" />
+                Enviar Solicitação
               </Button>
             </div>
           </div>
@@ -107,12 +112,15 @@ export function PortalTicketsPage() {
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Categoria / Prioridade</TableHead>
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Abertura / Última Info</TableHead>
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-center">Status</TableHead>
-              <TableHead className="w-12"></TableHead>
+              <TableHead className="w-12" />
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tickets.map(t => (
-              <TableRow key={t.id} className={`hover:bg-muted/30 transition-colors group cursor-pointer ${["Resolvido", "Fechado"].includes(t.status) ? "opacity-70" : ""}`}>
+            {tickets.map((t) => (
+              <TableRow
+                key={t.id}
+                className={`hover:bg-muted/30 transition-colors group cursor-pointer ${["Resolvido", "Fechado"].includes(t.status) ? "opacity-70" : ""}`}
+              >
                 <TableCell className="font-mono text-sm py-4 text-muted-foreground">{t.id}</TableCell>
                 <TableCell className="py-4">
                   <div className="text-sm font-medium group-hover:text-accent transition-colors">{t.title}</div>
