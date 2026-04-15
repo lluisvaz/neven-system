@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Briefcase, FileText, Settings, ChevronRight, Menu, X,
-  LayoutDashboard, Users, GitBranch, CheckSquare, Building2,
+  LayoutDashboard, Users, CheckSquare, Building2,
   ArrowDownLeft, ArrowUpRight, TrendingUp, Truck, Package,
   FileCheck2, CreditCard, RefreshCw, LifeBuoy, Rocket,
   MessageSquare, FileCheck, Plus
@@ -18,8 +18,7 @@ const navigation: NavEntry[] = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard, single: true },
   {
     name: "CRM", items: [
-      { name: "Contatos", href: "/crm/contacts", icon: Users },
-      { name: "Pipeline", href: "/crm/pipeline", icon: GitBranch },
+      { name: "Leads", href: "/crm/contacts", icon: Users },
       { name: "Atividades", href: "/crm/activities", icon: CheckSquare },
       { name: "Comunicações", href: "/communications", icon: MessageSquare },
     ]

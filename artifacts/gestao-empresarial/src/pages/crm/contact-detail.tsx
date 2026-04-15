@@ -4,23 +4,36 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MessageSquare, Mail, CheckSquare, Plus, Phone, FileText, DollarSign, ArrowLeft, Calendar } from "lucide-react";
+import { MessageSquare, Mail, CheckSquare, Plus, Phone, FileText, DollarSign, ArrowLeft, Calendar, Globe, CreditCard, Banknote } from "lucide-react";
 import { Link } from "wouter";
 
 const contact = {
-  id: "1", name: "João Silva", company: "Tech Solutions Ltda", cargo: "Diretor de Tecnologia",
-  email: "joao@techsolutions.com.br", phone: "+55 11 99887-6655", cpf: "123.456.789-00",
-  status: "Cliente Ativo", responsible: "Maria Santos", score: 85,
-  address: "Rua Augusta, 1500, Sala 301 - Consolação, São Paulo - SP, 01304-001",
-  origin: "Indicação", tags: ["Enterprise", "Tecnologia", "Upsell"],
+  id: "1",
+  name: "João Silva",
+  company: "Tech Solutions Ltda",
+  cargo: "Diretor de Tecnologia",
+  email: "joao@techsolutions.com.br",
+  phone: "+55 11 99887-6655",
+  country: "Brasil",
+  countryCode: "🇧🇷",
+  currency: "BRL (R$)",
+  language: "Português (BR)",
+  timezone: "America/São_Paulo (UTC−3)",
+  stage: "Proposta",
+  responsible: "Maria Santos",
+  score: 85,
+  address: "Rua Augusta, 1500, Sala 301 — Consolação, São Paulo — SP, 01304-001",
+  origin: "Indicação",
+  tags: ["Enterprise", "Tecnologia", "Upsell"],
+  paymentMethods: ["PIX", "Cartão de Crédito", "Boleto"],
   nextActivity: { type: "Reunião de Follow-up", date: "18/04/2026", time: "14:00" },
 };
 
 const timeline = [
   { id: 1, type: "email", title: "E-mail enviado: Proposta Comercial v2", date: "14/04/2026", time: "10:32", author: "Maria Santos" },
   { id: 2, type: "note", title: "Nota adicionada: Cliente demonstrou interesse no plano Enterprise", date: "12/04/2026", time: "16:15", author: "Maria Santos" },
-  { id: 3, type: "call", title: "Ligação realizada - 12min - Contato feito", date: "10/04/2026", time: "11:00", author: "Carlos Lima" },
-  { id: 4, type: "status", title: "Status alterado: Prospect → Cliente Ativo", date: "08/04/2026", time: "09:45", author: "Sistema" },
+  { id: 3, type: "call", title: "Ligação realizada — 12min — Contato feito", date: "10/04/2026", time: "11:00", author: "Carlos Lima" },
+  { id: 4, type: "status", title: "Etapa alterada: Qualificação → Proposta", date: "08/04/2026", time: "09:45", author: "Sistema" },
   { id: 5, type: "task", title: "Tarefa concluída: Enviar documentação técnica", date: "05/04/2026", time: "14:20", author: "Maria Santos" },
 ];
 
@@ -36,8 +49,8 @@ const tasks = [
 ];
 
 const billings = [
-  { id: "FAT-0041", date: "01/04/2026", value: "R$ 8.500,00", status: "Pago", method: "Cartão de Crédito" },
-  { id: "FAT-0038", date: "01/03/2026", value: "R$ 8.500,00", status: "Pago", method: "PIX" },
+  { id: "FAT-0041", date: "01/04/2026", value: "R$ 8.500,00", status: "Pago", method: "PIX" },
+  { id: "FAT-0038", date: "01/03/2026", value: "R$ 8.500,00", status: "Pago", method: "Cartão de Crédito" },
   { id: "FAT-0035", date: "01/02/2026", value: "R$ 7.200,00", status: "Pago", method: "Boleto" },
 ];
 
@@ -56,7 +69,11 @@ export function ContactDetailPage() {
           </Avatar>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">{contact.name}</h1>
-            <p className="text-sm text-muted-foreground">{contact.cargo} em <Link href="#" className="text-foreground hover:text-accent transition-colors">{contact.company}</Link></p>
+            <p className="text-sm text-muted-foreground">
+              {contact.cargo} em <Link href="#" className="text-foreground hover:text-accent transition-colors">{contact.company}</Link>
+              <span className="mx-2 text-muted-foreground/40">·</span>
+              <span>{contact.countryCode} {contact.country}</span>
+            </p>
           </div>
         </div>
         <div className="ml-auto flex gap-2">
@@ -67,16 +84,14 @@ export function ContactDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-3 flex flex-col gap-6">
+        <div className="lg:col-span-3 flex flex-col gap-4">
+
           <div className="space-y-4 border border-border p-4 rounded-sm">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sobre o Contato</h3>
-            
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Etapa do Lead</h3>
             <div className="space-y-3">
               <div>
-                <p className="text-xs text-muted-foreground">Status</p>
-                <Badge variant="default" className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 mt-1">{contact.status}</Badge>
+                <Badge variant="default" className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">{contact.stage}</Badge>
               </div>
-              
               <div>
                 <p className="text-xs text-muted-foreground">Score de Engajamento</p>
                 <div className="flex items-center gap-2 mt-1">
@@ -84,25 +99,13 @@ export function ContactDetailPage() {
                   <span className="text-xs font-mono">{contact.score}</span>
                 </div>
               </div>
-
-              <div className="pt-2 border-t border-border">
-                <p className="text-xs text-muted-foreground mb-1">E-mail</p>
-                <p className="text-sm">{contact.email}</p>
-              </div>
-              
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Telefone</p>
-                <p className="text-sm font-mono">{contact.phone}</p>
-              </div>
-              
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Responsável</p>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2">
                   <Avatar className="w-5 h-5 rounded-sm"><AvatarFallback className="text-[8px] bg-secondary text-secondary-foreground rounded-sm">{contact.responsible.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
                   <p className="text-sm">{contact.responsible}</p>
                 </div>
               </div>
-
               <div>
                 <p className="text-xs text-muted-foreground mb-1.5">Tags</p>
                 <div className="flex flex-wrap gap-1">
@@ -112,10 +115,36 @@ export function ContactDetailPage() {
             </div>
           </div>
 
-          <div className="space-y-4 border border-border p-4 rounded-sm">
+          <div className="space-y-3 border border-border p-4 rounded-sm">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contato & Localização</h3>
+            <InfoRow label="E-mail" value={contact.email} />
+            <InfoRow label="Telefone" value={contact.phone} mono />
+            <InfoRow label="País" value={`${contact.countryCode} ${contact.country}`} />
+            <InfoRow label="Idioma" value={contact.language} />
+            <InfoRow label="Fuso horário" value={contact.timezone} mono small />
+            <InfoRow label="Endereço" value={contact.address} small />
+          </div>
+
+          <div className="space-y-3 border border-border p-4 rounded-sm">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Financeiro</h3>
+            <InfoRow label="Moeda" value={contact.currency} mono />
+            <div>
+              <p className="text-xs text-muted-foreground mb-1.5">Formas de Pagamento</p>
+              <div className="flex flex-wrap gap-1">
+                {contact.paymentMethods.map(m => (
+                  <Badge key={m} variant="outline" className="rounded-sm text-[10px] font-mono uppercase tracking-wider flex items-center gap-1">
+                    <CreditCard className="w-2.5 h-2.5" />
+                    {m}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3 border border-border p-4 rounded-sm">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Próxima Ação</h3>
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-sm bg-muted flex items-center justify-center mt-0.5">
+              <div className="w-8 h-8 rounded-sm bg-muted flex items-center justify-center mt-0.5 flex-shrink-0">
                 <Calendar className="w-4 h-4 text-muted-foreground" />
               </div>
               <div>
@@ -130,9 +159,9 @@ export function ContactDetailPage() {
           <Tabs defaultValue="timeline" className="w-full">
             <TabsList className="bg-transparent border-b border-border w-full justify-start rounded-none h-auto p-0 space-x-6 mb-6">
               {['Timeline', 'Oportunidades', 'Tarefas', 'Cobranças'].map(tab => (
-                <TabsTrigger 
+                <TabsTrigger
                   key={tab}
-                  value={tab.toLowerCase()} 
+                  value={tab.toLowerCase()}
                   className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-foreground rounded-none px-0 pb-2 text-sm uppercase tracking-wider font-medium text-muted-foreground data-[state=active]:text-foreground"
                 >
                   {tab}
@@ -222,7 +251,7 @@ export function ContactDetailPage() {
             </TabsContent>
 
             <TabsContent value="cobranças" className="space-y-4 mt-0">
-               <div className="flex justify-end mb-4">
+              <div className="flex justify-end mb-4">
                 <Button size="sm" variant="outline" className="rounded-sm"><DollarSign className="w-3.5 h-3.5 mr-2" />Nova Fatura</Button>
               </div>
               <Table>
@@ -250,10 +279,18 @@ export function ContactDetailPage() {
                 </TableBody>
               </Table>
             </TabsContent>
-
           </Tabs>
         </div>
       </div>
+    </div>
+  );
+}
+
+function InfoRow({ label, value, mono, small }: { label: string; value: string; mono?: boolean; small?: boolean }) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
+      <p className={`${small ? "text-xs" : "text-sm"} ${mono ? "font-mono" : ""} break-words`}>{value}</p>
     </div>
   );
 }

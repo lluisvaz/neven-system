@@ -8,7 +8,6 @@ import { PortalLayout } from "@/components/layout/PortalLayout";
 import { Dashboard } from "@/pages/dashboard";
 import { ContactsPage } from "@/pages/crm/contacts";
 import { ContactDetailPage } from "@/pages/crm/contact-detail";
-import { PipelinePage } from "@/pages/crm/pipeline";
 import { ActivitiesPage } from "@/pages/crm/activities";
 import { ClientsPage } from "@/pages/erp/clients";
 import { ReceivablesPage } from "@/pages/erp/receivables";
@@ -45,7 +44,6 @@ function Router() {
 
       <Route path="/crm/contacts"><AdminLayout><ContactsPage /></AdminLayout></Route>
       <Route path="/crm/contacts/:id"><AdminLayout><ContactDetailPage /></AdminLayout></Route>
-      <Route path="/crm/pipeline"><AdminLayout><PipelinePage /></AdminLayout></Route>
       <Route path="/crm/activities"><AdminLayout><ActivitiesPage /></AdminLayout></Route>
 
       <Route path="/erp/clients"><AdminLayout><ClientsPage /></AdminLayout></Route>
