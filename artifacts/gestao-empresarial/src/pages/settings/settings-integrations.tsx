@@ -15,7 +15,7 @@ const integrations: Integration[] = [
   {
     id: 1,
     name: "Stripe",
-    logoUrl: "https://cdn.brandfetch.io/idxAg10C0L/theme/dark/logo.svg?c=1bxid64Mup7aczewSAYMX&t=1746435914582",
+    logoUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQGluJhW7I1NYU7jF77E-9K9I46_ib_DUNHw&s",
     description: "Gateway de pagamento — cobranças, assinaturas, reembolsos",
     status: "Conectado",
     config: "API Key configurada",
@@ -42,7 +42,7 @@ const integrations: Integration[] = [
   {
     id: 4,
     name: "WhatsApp Business",
-    logoUrl: "https://cdn.brandfetch.io/id6Zq084G_/theme/dark/logo.svg?c=1bxid64Mup7aczewSAYMX&t=1725260983764",
+    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/960px-WhatsApp.svg.png?_=20220228223904",
     description: "Envio de mensagens transacionais e de cobrança",
     status: "Conectado",
     config: "Número verificado",

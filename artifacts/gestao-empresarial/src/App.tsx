@@ -27,7 +27,7 @@ function Router() {
       <Route path="/crm/contacts"><AdminLayout><CrmPage /></AdminLayout></Route>
       <Route path="/crm/contacts/:id"><AdminLayout><CrmPage /></AdminLayout></Route>
       <Route path="/crm/activities"><AdminLayout><CrmPage /></AdminLayout></Route>
-      <Route path="/crm/communications"><AdminLayout><CrmPage /></AdminLayout></Route>
+      <Route path="/crm/communications"><AdminLayout mobileRestricted><CrmPage /></AdminLayout></Route>
       <Route path="/communications"><Redirect to="/crm/communications" /></Route>
 
       <Route path="/erp/clients"><AdminLayout><ErpPage /></AdminLayout></Route>
@@ -45,8 +45,8 @@ function Router() {
       <Route path="/billing/subscriptions"><AdminLayout><BillingPage /></AdminLayout></Route>
       <Route path="/billing/new"><AdminLayout><BillingPage /></AdminLayout></Route>
 
-      <Route path="/support/tickets"><AdminLayout><SupportPage /></AdminLayout></Route>
-      <Route path="/support/tickets/:id"><AdminLayout><SupportPage /></AdminLayout></Route>
+      <Route path="/support/tickets"><AdminLayout mobileRestricted><SupportPage /></AdminLayout></Route>
+      <Route path="/support/tickets/:id"><AdminLayout mobileRestricted><SupportPage /></AdminLayout></Route>
 
       <Route path="/settings"><Redirect to="/settings/profile" /></Route>
       <Route path="/settings/profile"><AdminLayout><SettingsPage /></AdminLayout></Route>

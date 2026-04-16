@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, Redirect } from "wouter";
 import {
   Briefcase, FileText, Settings, ChevronRight, Menu, X,
   LayoutDashboard, Users, CheckSquare, Building2,
@@ -8,19 +8,25 @@ import {
   MessageSquare, Plus
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-type NavItem = { name: string; href: string; icon: React.ElementType };
+type NavItem = {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+  mobileDisabled?: boolean;
+};
 type NavGroup = { name: string; items: NavItem[] };
-type NavSingle = { name: string; href: string; icon: React.ElementType; single: true };
+type NavSingle = { name: string; href: string; icon: React.ElementType; single: true; mobileDisabled?: boolean };
 type NavEntry = NavGroup | NavSingle;
 
 const navigation: NavEntry[] = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard, single: true },
   {
     name: "CRM", items: [
-      { name: "Leads",        href: "/crm/contacts",      icon: Users },
-      { name: "Atividades",   href: "/crm/activities",    icon: CheckSquare },
-      { name: "Comunicações", href: "/crm/communications", icon: MessageSquare },
+      { name: "Leads",        href: "/crm/contacts",       icon: Users },
+      { name: "Atividades",   href: "/crm/activities",     icon: CheckSquare },
+      { name: "Comunicações", href: "/crm/communications",  icon: MessageSquare, mobileDisabled: true },
     ]
   },
   {
@@ -32,35 +38,46 @@ const navigation: NavEntry[] = [
   },
   {
     name: "Faturamento", items: [
-      { name: "Visão Geral",    href: "/billing",                icon: LayoutDashboard },
-      { name: "A Receber",      href: "/billing/receivables",    icon: ArrowDownLeft },
-      { name: "A Pagar",        href: "/billing/payables",       icon: ArrowUpRight },
-      { name: "Fluxo de Caixa", href: "/billing/cashflow",       icon: TrendingUp },
-      { name: "Assinaturas",    href: "/billing/subscriptions",  icon: RefreshCw },
-      { name: "Nova Cobrança",  href: "/billing/new",            icon: Plus },
+      { name: "Visão Geral",    href: "/billing",               icon: LayoutDashboard },
+      { name: "A Receber",      href: "/billing/receivables",   icon: ArrowDownLeft },
+      { name: "A Pagar",        href: "/billing/payables",      icon: ArrowUpRight },
+      { name: "Fluxo de Caixa", href: "/billing/cashflow",      icon: TrendingUp },
+      { name: "Assinaturas",    href: "/billing/subscriptions", icon: RefreshCw },
+      { name: "Nova Cobrança",  href: "/billing/new",           icon: Plus },
     ]
   },
   {
     name: "Suporte", items: [
-      { name: "Tickets", href: "/support/tickets", icon: LifeBuoy },
+      { name: "Tickets", href: "/support/tickets", icon: LifeBuoy, mobileDisabled: true },
     ]
   },
   { name: "Configurações", href: "/settings", icon: Settings, single: true },
 ];
 
-export function AdminLayout({ children }: { children: ReactNode }) {
+const MOBILE_DISABLED_PATHS = ["/support/tickets", "/crm/communications"];
+
+export function AdminLayout({ children, mobileRestricted }: { children: ReactNode; mobileRestricted?: boolean }) {
   const [location] = useLocation();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  if (mobileRestricted && isMobile) {
+    return <Redirect to="/" />;
+  }
 
   const isActive = (href: string) =>
     href === "/" ? location === "/" : location === href || location.startsWith(href + "/");
 
-  const linkClass = (href: string) =>
-    `flex items-center gap-2.5 px-2.5 h-8 rounded-sm text-sm transition-colors ${
+  const linkClass = (href: string, disabled?: boolean) => {
+    if (disabled) {
+      return "flex items-center gap-2.5 px-2.5 h-8 rounded-sm text-sm opacity-35 cursor-not-allowed select-none text-muted-foreground";
+    }
+    return `flex items-center gap-2.5 px-2.5 h-8 rounded-sm text-sm transition-colors ${
       isActive(href)
         ? "bg-foreground text-background font-medium"
         : "text-muted-foreground hover:text-foreground hover:bg-muted"
     }`;
+  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -92,7 +109,17 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         <nav className="no-scrollbar flex-1 overflow-y-auto py-3 px-2.5 space-y-0.5">
           {navigation.map((entry) => {
             if ("single" in entry) {
-              return (
+              const disabled = isMobile && entry.mobileDisabled;
+              return disabled ? (
+                <span
+                  key={entry.href}
+                  className={linkClass(entry.href, true)}
+                  title="Não disponível no mobile"
+                >
+                  <entry.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                  {entry.name}
+                </span>
+              ) : (
                 <Link
                   key={entry.href}
                   href={entry.href}
@@ -112,18 +139,30 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                   {entry.name}
                 </p>
                 <div className="space-y-px">
-                  {entry.items.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={linkClass(item.href)}
-                      onClick={() => setMobileNavOpen(false)}
-                      data-testid={`nav-${item.href.replace(/\//g, "-").slice(1)}`}
-                    >
-                      <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
-                      {item.name}
-                    </Link>
-                  ))}
+                  {entry.items.map((item) => {
+                    const disabled = isMobile && item.mobileDisabled;
+                    return disabled ? (
+                      <span
+                        key={item.href}
+                        className={linkClass(item.href, true)}
+                        title="Não disponível no mobile"
+                      >
+                        <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                        {item.name}
+                      </span>
+                    ) : (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={linkClass(item.href)}
+                        onClick={() => setMobileNavOpen(false)}
+                        data-testid={`nav-${item.href.replace(/\//g, "-").slice(1)}`}
+                      >
+                        <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -170,3 +209,5 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+export { MOBILE_DISABLED_PATHS };

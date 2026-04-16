@@ -1,32 +1,48 @@
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, Redirect } from "wouter";
 import { SettingsProfilePage } from "./settings-profile";
 import { SettingsCompanyPage } from "./settings-company";
 import { SettingsUsersPage } from "./settings-users";
 import { DistributionPage } from "@/pages/erp/distribution";
 import { SettingsIntegrationsPage } from "./settings-integrations";
 import { SettingsAuditPage } from "./settings-audit";
+import { useAuth } from "@/contexts/auth-context";
 
-const tabs = [
+type Tab = { label: string; path: string; adminOnly?: boolean };
+
+const tabs: Tab[] = [
   { label: "Perfil",        path: "/settings/profile" },
-  { label: "Empresa",       path: "/settings/company" },
-  { label: "Usuários",      path: "/settings/users" },
-  { label: "Distribuição",  path: "/settings/distribution" },
-  { label: "Integrações",   path: "/settings/integrations" },
-  { label: "Auditoria",     path: "/settings/audit" },
+  { label: "Empresa",       path: "/settings/company",      adminOnly: true },
+  { label: "Usuários",      path: "/settings/users",        adminOnly: true },
+  { label: "Distribuição",  path: "/settings/distribution", adminOnly: true },
+  { label: "Integrações",   path: "/settings/integrations", adminOnly: true },
+  { label: "Auditoria",     path: "/settings/audit",        adminOnly: true },
 ];
 
 export function SettingsPage() {
   const [location] = useLocation();
+  const { isAdmin } = useAuth();
 
-  const activeTab = tabs.find(t =>
+  const visibleTabs = tabs.filter(t => !t.adminOnly || isAdmin);
+
+  const activeTab = visibleTabs.find(t =>
     location === t.path || location.startsWith(t.path + "/")
-  ) ?? tabs[0];
+  );
+
+  if (!activeTab) {
+    const requestedTab = tabs.find(t =>
+      location === t.path || location.startsWith(t.path + "/")
+    );
+    if (requestedTab?.adminOnly && !isAdmin) {
+      return <Redirect to="/settings/profile" />;
+    }
+    return <Redirect to="/settings/profile" />;
+  }
 
   return (
     <div>
       <div className="border-b border-border mb-8 -mt-1">
         <nav className="-mb-px flex gap-0 overflow-x-auto no-scrollbar">
-          {tabs.map(tab => {
+          {visibleTabs.map(tab => {
             const isActive = tab.path === activeTab.path;
             return (
               <Link
@@ -47,11 +63,11 @@ export function SettingsPage() {
 
       <div>
         {activeTab.path === "/settings/profile"      && <SettingsProfilePage />}
-        {activeTab.path === "/settings/company"      && <SettingsCompanyPage />}
-        {activeTab.path === "/settings/users"        && <SettingsUsersPage />}
-        {activeTab.path === "/settings/distribution" && <DistributionPage />}
-        {activeTab.path === "/settings/integrations" && <SettingsIntegrationsPage />}
-        {activeTab.path === "/settings/audit"        && <SettingsAuditPage />}
+        {activeTab.path === "/settings/company"      && isAdmin && <SettingsCompanyPage />}
+        {activeTab.path === "/settings/users"        && isAdmin && <SettingsUsersPage />}
+        {activeTab.path === "/settings/distribution" && isAdmin && <DistributionPage />}
+        {activeTab.path === "/settings/integrations" && isAdmin && <SettingsIntegrationsPage />}
+        {activeTab.path === "/settings/audit"        && isAdmin && <SettingsAuditPage />}
       </div>
     </div>
   );
