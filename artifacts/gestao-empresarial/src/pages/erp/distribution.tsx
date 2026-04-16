@@ -82,7 +82,17 @@ export function DistributionPage() {
     }
   }, []);
 
+  // Keep expensesPercent in sync with the sum of individual expense amounts
+  useEffect(() => {
+    if (monthlyRevenue > 0) {
+      const expTotal = expenses.reduce((s, e) => s + (isFinite(e.amount) ? e.amount : 0), 0);
+      const derivedPct = clampPercent(Math.round((expTotal / monthlyRevenue) * 100));
+      setExpensesPercent(derivedPct);
+    }
+  }, [expenses, monthlyRevenue]);
+
   const totals = useMemo(() => {
+    const expensesAmountTotal = expenses.reduce((s, e) => s + (isFinite(e.amount) ? e.amount : 0), 0);
     const allocatedPercent = companyCashPercent + partnersPercent + expensesPercent;
     const unallocatedPercent = 100 - allocatedPercent;
     return {
@@ -90,10 +100,10 @@ export function DistributionPage() {
       unallocatedPercent,
       companyCashValue: (monthlyRevenue * companyCashPercent) / 100,
       partnersValue: (monthlyRevenue * partnersPercent) / 100,
-      expensesValue: (monthlyRevenue * expensesPercent) / 100,
+      expensesValue: expensesAmountTotal,
       unallocatedValue: (monthlyRevenue * unallocatedPercent) / 100,
       partnersShareTotal: partners.reduce((s, p) => s + p.share, 0),
-      expensesAmountTotal: expenses.reduce((s, e) => s + e.amount, 0),
+      expensesAmountTotal,
     };
   }, [companyCashPercent, expenses, expensesPercent, monthlyRevenue, partners, partnersPercent]);
 
@@ -260,9 +270,9 @@ export function DistributionPage() {
           </CardHeader>
           <CardContent className="p-4 space-y-6">
             {[
-              { label: "Caixa da empresa", value: companyCashPercent, setValue: setCompanyCashPercent, icon: Building2, desc: "Reserva, capital de giro, reinvestimento, segurança e crescimento." },
-              { label: "Retirada dos sócios", value: partnersPercent, setValue: setPartnersPercent, icon: Wallet, desc: "Pró-labore, distribuição planejada e pagamento para sócios." },
-              { label: "Despesas da operação", value: expensesPercent, setValue: setExpensesPercent, icon: BriefcaseBusiness, desc: "Folha, assinaturas, fornecedores, impostos, infraestrutura e recorrências." },
+              { label: "Caixa da empresa",    value: companyCashPercent, setValue: setCompanyCashPercent, icon: Building2,        desc: "Reserva, capital de giro, reinvestimento, segurança e crescimento.", auto: false },
+              { label: "Retirada dos sócios", value: partnersPercent,    setValue: setPartnersPercent,    icon: Wallet,           desc: "Pró-labore, distribuição planejada e pagamento para sócios.", auto: false },
+              { label: "Despesas da operação",value: expensesPercent,    setValue: setExpensesPercent,    icon: BriefcaseBusiness, desc: `Calculado automaticamente pela soma das categorias de despesas (${fmtBRL(totals.expensesAmountTotal)}).`, auto: true },
             ].map((item) => (
               <div key={item.label} className="space-y-3">
                 <div className="flex items-start justify-between gap-3">
@@ -271,16 +281,30 @@ export function DistributionPage() {
                       <item.icon className="h-4 w-4 text-accent" />
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">{item.label}</Label>
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        {item.label}
+                        {item.auto && <span className="text-[9px] font-mono uppercase tracking-wider text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700 px-1 py-0.5 rounded-sm">auto</span>}
+                      </Label>
                       <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Input type="number" value={item.value} onChange={e => item.setValue(clampPercent(Number(e.target.value)))} className="w-20 rounded-sm font-mono text-right" />
+                    <Input
+                      type="number"
+                      value={item.value}
+                      onChange={e => !item.auto && item.setValue(clampPercent(Number(e.target.value)))}
+                      readOnly={item.auto}
+                      className={`w-20 rounded-sm font-mono text-right ${item.auto ? "opacity-60 cursor-not-allowed" : ""}`}
+                    />
                     <span className="text-sm font-mono text-muted-foreground">%</span>
                   </div>
                 </div>
-                <Slider value={[item.value]} min={0} max={100} step={1} onValueChange={v => item.setValue(v[0])} />
+                <Slider
+                  value={[item.value]}
+                  min={0} max={100} step={1}
+                  onValueChange={v => !item.auto && item.setValue(v[0])}
+                  className={item.auto ? "opacity-50 pointer-events-none" : ""}
+                />
               </div>
             ))}
 
@@ -412,8 +436,9 @@ export function DistributionPage() {
                 <TableBody>
                   {expenses.map(e => {
                     const safeAmount = isFinite(e.amount) ? e.amount : 0;
-                    const pct = totals.expensesValue > 0
-                      ? Math.round((safeAmount / totals.expensesValue) * 10000) / 100
+                    // % = this expense's share of the total expenses pool
+                    const pct = totals.expensesAmountTotal > 0
+                      ? Math.round((safeAmount / totals.expensesAmountTotal) * 10000) / 100
                       : 0;
                     return (
                       <TableRow key={e.id} className="hover:bg-muted/50">
@@ -453,9 +478,14 @@ export function DistributionPage() {
                 </TableBody>
               </Table>
             </div>
-            <div className="border-t border-border px-4 py-3 flex justify-between text-sm">
+            <div className="border-t border-border px-4 py-3 flex flex-wrap items-center justify-between gap-2 text-sm">
               <span className="text-muted-foreground">Total das despesas</span>
-              <span className="font-mono">{fmtBRL(totals.expensesAmountTotal)}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono text-muted-foreground">
+                  {expensesPercent}% da receita base
+                </span>
+                <span className="font-mono font-semibold">{fmtBRL(totals.expensesAmountTotal)}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
