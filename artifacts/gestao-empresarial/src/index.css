@@ -1,4 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/GeistSans-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -105,9 +119,9 @@
   --sidebar-accent-foreground: 0 0% 9%;
   --sidebar-ring: 0 0% 9%;
 
-  --app-font-sans: 'Inter', sans-serif;
+  --app-font-sans: 'Geist', sans-serif;
   --app-font-serif: Georgia, serif;
-  --app-font-mono: 'Space Mono', monospace;
+  --app-font-mono: 'Geist Mono', monospace;
   --radius: 0.25rem; /* Very subtle radius for minimal look */
 }
 
