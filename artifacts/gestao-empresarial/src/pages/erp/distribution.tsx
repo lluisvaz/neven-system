@@ -36,7 +36,7 @@ const initialExpenses: Expense[] = [
   { id: 7, name: "Reserva para imprevistos",   amount: 1000,  type: "Reserva" },
 ];
 
-const storageKey = "gestorpro-financial-distribution";
+const storageKey = "gestorpro-financial-distribution-v2";
 const clampPercent = (v: number) => Math.max(0, Math.min(100, Math.round(v)));
 
 export function DistributionPage() {
@@ -114,8 +114,14 @@ export function DistributionPage() {
   const updateExpense = (id: number, field: keyof Expense, value: string | number) =>
     setExpenses(cur => cur.map(e => e.id === id ? {
       ...e,
-      [field]: field === "amount" ? Math.max(0, Number(value)) : String(value)
+      [field]: field === "amount" ? Math.max(0, Number(value)) : String(value),
     } : e));
+
+  const updateExpenseByPct = (id: number, pct: number) => {
+    const cleanPct = Math.max(0, Math.min(999, Number(pct)));
+    const newAmount = totals.expensesValue > 0 ? (cleanPct / 100) * totals.expensesValue : 0;
+    setExpenses(cur => cur.map(e => e.id === id ? { ...e, amount: Math.round(newAmount * 100) / 100 } : e));
+  };
 
   return (
     <div className="space-y-6">
@@ -398,35 +404,52 @@ export function DistributionPage() {
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="h-8 text-xs">Despesa</TableHead>
                     <TableHead className="h-8 text-xs">Tipo</TableHead>
-                    <TableHead className="h-8 text-xs w-32 text-right">Valor (R$)</TableHead>
+                    <TableHead className="h-8 text-xs w-20">%</TableHead>
+                    <TableHead className="h-8 text-xs w-28">R$</TableHead>
                     <TableHead className="h-8 text-xs w-12" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {expenses.map(e => (
-                    <TableRow key={e.id} className="hover:bg-muted/50">
-                      <TableCell className="py-3 min-w-[190px]">
-                        <Input value={e.name} onChange={ev => updateExpense(e.id, "name", ev.target.value)} className="rounded-sm" />
-                      </TableCell>
-                      <TableCell className="py-3 min-w-[130px]">
-                        <Input value={e.type} onChange={ev => updateExpense(e.id, "type", ev.target.value)} className="rounded-sm" />
-                      </TableCell>
-                      <TableCell className="py-3">
-                        <Input
-                          type="number"
-                          value={e.amount}
-                          onChange={ev => updateExpense(e.id, "amount", ev.target.value)}
-                          className="rounded-sm font-mono text-right"
-                          min={0}
-                        />
-                      </TableCell>
-                      <TableCell className="py-3 text-right">
-                        <Button variant="ghost" size="icon" className="rounded-sm h-8 w-8" onClick={() => setExpenses(c => c.filter(x => x.id !== e.id))}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {expenses.map(e => {
+                    const safeAmount = isFinite(e.amount) ? e.amount : 0;
+                    const pct = totals.expensesValue > 0
+                      ? Math.round((safeAmount / totals.expensesValue) * 10000) / 100
+                      : 0;
+                    return (
+                      <TableRow key={e.id} className="hover:bg-muted/50">
+                        <TableCell className="py-2 min-w-[160px]">
+                          <Input value={e.name ?? ""} onChange={ev => updateExpense(e.id, "name", ev.target.value)} className="rounded-sm h-8 text-xs" />
+                        </TableCell>
+                        <TableCell className="py-2 min-w-[110px]">
+                          <Input value={e.type ?? ""} onChange={ev => updateExpense(e.id, "type", ev.target.value)} className="rounded-sm h-8 text-xs" />
+                        </TableCell>
+                        <TableCell className="py-2">
+                          <Input
+                            type="number"
+                            value={isFinite(pct) ? pct : 0}
+                            onChange={ev => updateExpenseByPct(e.id, Number(ev.target.value))}
+                            className="rounded-sm font-mono text-right h-8 text-xs"
+                            min={0}
+                            step={0.1}
+                          />
+                        </TableCell>
+                        <TableCell className="py-2">
+                          <Input
+                            type="number"
+                            value={safeAmount}
+                            onChange={ev => updateExpense(e.id, "amount", ev.target.value)}
+                            className="rounded-sm font-mono text-right h-8 text-xs"
+                            min={0}
+                          />
+                        </TableCell>
+                        <TableCell className="py-2 text-right">
+                          <Button variant="ghost" size="icon" className="rounded-sm h-8 w-8" onClick={() => setExpenses(c => c.filter(x => x.id !== e.id))}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
