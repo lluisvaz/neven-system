@@ -49,7 +49,7 @@ export function BillingDashboardPage() {
 
   return (
     <div className="space-y-10">
-      <header className="flex items-end justify-between">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Faturamento</h1>
           <p className="text-sm font-mono text-muted-foreground mt-1">
@@ -151,6 +151,7 @@ export function BillingDashboardPage() {
       <div className="space-y-4">
         <h2 className="text-sm uppercase tracking-wider font-medium text-muted-foreground">Atenção Necessária</h2>
         <div className="border border-border rounded-sm overflow-hidden">
+          <div className="overflow-x-auto no-scrollbar">
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow className="hover:bg-transparent">
@@ -177,6 +178,7 @@ export function BillingDashboardPage() {
               ))}
             </TableBody>
           </Table>
+          </div>
         </div>
       </div>
     </div>

@@ -41,7 +41,7 @@ export function ReceivablesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Contas a Receber</h1>
           <p className="text-sm font-mono text-muted-foreground mt-1">
@@ -91,8 +91,8 @@ export function ReceivablesPage() {
         })}
       </div>
 
-      <div className="flex gap-3 items-center">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Buscar fatura, cliente..." className="pl-9 rounded-sm border-muted-foreground/20 focus-visible:ring-accent" />
         </div>
@@ -100,6 +100,7 @@ export function ReceivablesPage() {
       </div>
 
       <div className="border border-border rounded-sm overflow-hidden">
+        <div className="overflow-x-auto no-scrollbar">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow className="hover:bg-transparent">
@@ -141,6 +142,7 @@ export function ReceivablesPage() {
             ))}
           </TableBody>
         </Table>
+        </div>
       </div>
     </div>
   );

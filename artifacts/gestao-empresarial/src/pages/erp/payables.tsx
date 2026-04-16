@@ -2,7 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Filter, Download, ArrowUpRight, ArrowDownRight, Activity } from "lucide-react";
+import { Plus, Search, Filter, Download } from "lucide-react";
 
 const summaryCards = [
   { title: "A Pagar (Abril)", value: "R$ 67.300,00", highlight: false },
@@ -30,12 +30,12 @@ const statusBadge: Record<string, "default" | "secondary" | "destructive" | "out
 export function PayablesPage() {
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Contas a Pagar</h1>
           <p className="text-sm font-mono text-muted-foreground mt-1">Gestão de obrigações financeiras</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" className="rounded-sm"><Download className="w-3.5 h-3.5 mr-2" />Exportar</Button>
           <Button size="sm" className="rounded-sm"><Plus className="w-3.5 h-3.5 mr-2" />Novo Lançamento</Button>
         </div>
@@ -50,8 +50,8 @@ export function PayablesPage() {
         ))}
       </div>
 
-      <div className="flex gap-3 items-center">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Buscar fornecedor, NF..." className="pl-9 rounded-sm border-muted-foreground/20 focus-visible:ring-accent" data-testid="input-search-payables" />
         </div>
@@ -59,44 +59,46 @@ export function PayablesPage() {
       </div>
 
       <div className="border border-border rounded-sm overflow-hidden">
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-24">Doc</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Fornecedor / Descrição</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Valor</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Vencimento</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Centro de Custo</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {payables.map(p => (
-              <TableRow key={p.id} className="hover:bg-muted/30 transition-colors">
-                <TableCell className="text-sm font-mono py-3 text-muted-foreground">{p.id}</TableCell>
-                <TableCell className="py-3">
-                  <div className="text-sm font-medium">{p.supplier}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{p.description}</div>
-                </TableCell>
-                <TableCell className="text-sm font-mono font-medium py-3">{p.value}</TableCell>
-                <TableCell className="text-sm font-mono py-3 text-muted-foreground">{p.due}</TableCell>
-                <TableCell className="py-3">
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">{p.costCenter}</span>
-                </TableCell>
-                <TableCell className="py-3 text-right">
-                  <div className="flex flex-col items-end gap-1">
-                    <Badge variant={statusBadge[p.status]} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
-                      {p.status}
-                    </Badge>
-                    {p.approval !== 'Aprovado' && (
-                      <span className="text-[10px] text-amber-600 font-medium tracking-wide uppercase">Pendente Aprovação</span>
-                    )}
-                  </div>
-                </TableCell>
+        <div className="overflow-x-auto no-scrollbar">
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-24 hidden sm:table-cell">Doc</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Fornecedor / Descrição</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Valor</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden md:table-cell">Vencimento</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden lg:table-cell">Centro de Custo</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Status</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {payables.map(p => (
+                <TableRow key={p.id} className="hover:bg-muted/30 transition-colors">
+                  <TableCell className="text-sm font-mono py-3 text-muted-foreground hidden sm:table-cell">{p.id}</TableCell>
+                  <TableCell className="py-3">
+                    <div className="text-sm font-medium">{p.supplier}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">{p.description}</div>
+                  </TableCell>
+                  <TableCell className="text-sm font-mono font-medium py-3">{p.value}</TableCell>
+                  <TableCell className="text-sm font-mono py-3 text-muted-foreground hidden md:table-cell">{p.due}</TableCell>
+                  <TableCell className="py-3 hidden lg:table-cell">
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">{p.costCenter}</span>
+                  </TableCell>
+                  <TableCell className="py-3 text-right">
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge variant={statusBadge[p.status]} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
+                        {p.status}
+                      </Badge>
+                      {p.approval !== 'Aprovado' && (
+                        <span className="text-[10px] text-amber-600 font-medium tracking-wide uppercase">Pendente Aprovação</span>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

@@ -35,14 +35,14 @@ const activeTickets = [
 export function PortalDashboardPage() {
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Visão Geral</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Bem-vindo(a) ao portal do cliente, {client.name}.
           </p>
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground bg-muted/40 border border-border rounded-sm px-2.5 py-1.5">
+        <div className="flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground bg-muted/40 border border-border rounded-sm px-2.5 py-1.5 w-fit">
           <span>{client.country}</span>
           <span className="text-border">·</span>
           <span>{client.currency}</span>

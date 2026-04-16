@@ -38,7 +38,7 @@ export function CashflowPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Fluxo de Caixa</h1>
           <p className="text-sm font-mono text-muted-foreground mt-1">
@@ -46,7 +46,7 @@ export function CashflowPage() {
             {!fin?.isLiveData && <span className="ml-2 text-amber-500 text-[10px]">[dados simulados]</span>}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <div className="flex border border-border rounded-sm overflow-hidden text-sm">
             <button className="px-3 py-1.5 hover:bg-muted/50 transition-colors">7d</button>
             <button className="px-3 py-1.5 bg-muted font-medium transition-colors border-l border-r border-border">30d</button>
@@ -119,6 +119,7 @@ export function CashflowPage() {
       <div className="space-y-4">
         <h2 className="text-sm uppercase tracking-wider font-medium text-muted-foreground">Movimentações Recentes</h2>
         <div className="border border-border rounded-sm overflow-hidden">
+          <div className="overflow-x-auto no-scrollbar">
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow className="hover:bg-transparent">
@@ -153,6 +154,7 @@ export function CashflowPage() {
               ))}
             </TableBody>
           </Table>
+          </div>
         </div>
       </div>
     </div>

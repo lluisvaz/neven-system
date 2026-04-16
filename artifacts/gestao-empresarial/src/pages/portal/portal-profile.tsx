@@ -46,7 +46,7 @@ export function PortalProfilePage() {
                   <Input defaultValue="+55 11 99887-6655" className="rounded-sm font-mono" />
                 </div>
               </div>
-              <div className="space-y-2 max-w-[50%]">
+              <div className="space-y-2 max-w-full sm:max-w-[50%]">
                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">CPF</Label>
                 <Input defaultValue="123.456.789-00" disabled className="rounded-sm font-mono opacity-60 bg-muted/50 cursor-not-allowed" />
                 <p className="text-[10px] text-muted-foreground">Usado para fins contratuais. Não pode ser alterado diretamente.</p>

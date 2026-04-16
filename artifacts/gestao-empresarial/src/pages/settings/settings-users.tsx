@@ -24,61 +24,63 @@ const roleBadge: Record<string, "default" | "secondary" | "outline"> = {
 export function SettingsUsersPage() {
   return (
     <div className="space-y-8 max-w-5xl">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Usuários</h1>
           <p className="text-sm font-mono text-muted-foreground mt-1">Gerencie acessos e permissões</p>
         </div>
-        <Button size="sm" className="rounded-sm"><Plus className="w-3.5 h-3.5 mr-2" />Convidar Usuário</Button>
+        <Button size="sm" className="rounded-sm w-fit"><Plus className="w-3.5 h-3.5 mr-2" />Convidar Usuário</Button>
       </div>
 
       <div className="border border-border rounded-sm overflow-hidden">
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Usuário</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Perfil</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Departamento</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Último Acesso</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-center">Status</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((u) => (
-              <TableRow key={u.id} className={`hover:bg-muted/30 transition-colors ${u.status === "Inativo" ? "opacity-50" : ""}`}>
-                <TableCell className="py-3">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-8 h-8 rounded-sm">
-                      <AvatarFallback className="text-[10px] font-mono bg-secondary text-secondary-foreground rounded-sm">
-                        {u.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{u.name}</p>
-                      <p className="text-xs text-muted-foreground">{u.email}</p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="py-3">
-                  <Badge variant={roleBadge[u.role] || "outline"} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
-                    {u.role}
-                  </Badge>
-                </TableCell>
-                <TableCell className="py-3 text-sm text-muted-foreground">{u.department}</TableCell>
-                <TableCell className="py-3 text-right text-sm font-mono text-muted-foreground">{u.lastAccess}</TableCell>
-                <TableCell className="py-3 text-center">
-                  <Badge variant={u.status === "Ativo" ? "default" : "secondary"} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
-                    {u.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="py-3 text-right">
-                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-sm"><MoreHorizontal className="w-4 h-4 text-muted-foreground" /></Button>
-                </TableCell>
+        <div className="overflow-x-auto no-scrollbar">
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Usuário</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Perfil</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden md:table-cell">Departamento</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right hidden sm:table-cell">Último Acesso</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-center">Status</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-12"></TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {users.map((u) => (
+                <TableRow key={u.id} className={`hover:bg-muted/30 transition-colors ${u.status === "Inativo" ? "opacity-50" : ""}`}>
+                  <TableCell className="py-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-8 h-8 rounded-sm">
+                        <AvatarFallback className="text-[10px] font-mono bg-secondary text-secondary-foreground rounded-sm">
+                          {u.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{u.name}</p>
+                        <p className="text-xs text-muted-foreground hidden sm:block">{u.email}</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-3">
+                    <Badge variant={roleBadge[u.role] || "outline"} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
+                      {u.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="py-3 text-sm text-muted-foreground hidden md:table-cell">{u.department}</TableCell>
+                  <TableCell className="py-3 text-right text-sm font-mono text-muted-foreground hidden sm:table-cell">{u.lastAccess}</TableCell>
+                  <TableCell className="py-3 text-center">
+                    <Badge variant={u.status === "Ativo" ? "default" : "secondary"} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
+                      {u.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="py-3 text-right">
+                    <Button variant="ghost" size="icon" className="w-8 h-8 rounded-sm"><MoreHorizontal className="w-4 h-4 text-muted-foreground" /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

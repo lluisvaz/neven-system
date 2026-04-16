@@ -27,12 +27,12 @@ export function TicketDetailPage() {
           <Button variant="ghost" size="icon" className="w-8 h-8 rounded-sm"><ArrowLeft className="w-4 h-4" /></Button>
         </Link>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{ticket.title}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-semibold tracking-tight">{ticket.title}</h1>
             <Badge variant="destructive" className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">{ticket.priority}</Badge>
             <Badge variant="secondary" className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">{ticket.status}</Badge>
           </div>
-          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-muted-foreground">
             <span className="font-mono text-xs">{ticket.id}</span>
             <span>•</span>
             <span>{ticket.client}</span>
@@ -77,11 +77,11 @@ export function TicketDetailPage() {
                 className="border-0 rounded-none focus-visible:ring-0 resize-none min-h-[120px] p-4 text-sm" 
                 data-testid="input-ticket-reply" 
               />
-              <div className="flex items-center justify-between p-2 bg-muted/50 border-t border-border">
+              <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-muted/50 border-t border-border">
                 <Button variant="ghost" size="icon" className="w-8 h-8 rounded-sm text-muted-foreground hover:text-foreground">
                   <Paperclip className="w-4 h-4" />
                 </Button>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Select defaultValue="keep_open">
                     <SelectTrigger className="h-8 text-xs rounded-sm border-border bg-background w-[180px]">
                       <SelectValue />

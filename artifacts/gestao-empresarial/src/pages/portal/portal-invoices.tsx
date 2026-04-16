@@ -17,12 +17,12 @@ const invoices = [
 export function PortalInvoicesPage() {
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Faturas</h1>
           <p className="text-sm font-mono text-muted-foreground mt-1">Histórico de cobranças e pagamentos</p>
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground bg-muted/40 border border-border rounded-sm px-2.5 py-1.5">
+        <div className="flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground bg-muted/40 border border-border rounded-sm px-2.5 py-1.5 w-fit">
           <span>{clientLocale.country}</span>
           <span className="text-border">·</span>
           <span>{clientLocale.currency}</span>
@@ -32,14 +32,15 @@ export function PortalInvoicesPage() {
       </div>
 
       <div className="border border-border rounded-sm overflow-hidden bg-card">
+        <div className="overflow-x-auto no-scrollbar">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-36">Fatura</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Emissão / Vencimento</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-36 hidden sm:table-cell">Fatura</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden md:table-cell">Emissão / Vencimento</TableHead>
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Valor ({clientLocale.currencySymbol})</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Método</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Nota Fiscal</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden sm:table-cell">Método</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden md:table-cell">Nota Fiscal</TableHead>
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-center">Status</TableHead>
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-28"></TableHead>
             </TableRow>
@@ -47,16 +48,16 @@ export function PortalInvoicesPage() {
           <TableBody>
             {invoices.map((inv) => (
               <TableRow key={inv.id} className={`hover:bg-muted/30 transition-colors group ${inv.status === "Pago" ? "opacity-80" : ""}`}>
-                <TableCell className="font-mono text-sm py-4 text-muted-foreground">{inv.id}</TableCell>
-                <TableCell className="py-4">
+                <TableCell className="font-mono text-sm py-4 text-muted-foreground hidden sm:table-cell">{inv.id}</TableCell>
+                <TableCell className="py-4 hidden md:table-cell">
                   <div className="flex flex-col gap-0.5">
                     <span className="text-sm font-mono text-muted-foreground">E: {inv.date}</span>
                     <span className="text-sm font-mono font-medium">V: {inv.due}</span>
                   </div>
                 </TableCell>
                 <TableCell className="text-sm font-mono font-medium py-4 text-right">{inv.value}</TableCell>
-                <TableCell className="text-sm py-4 text-muted-foreground font-mono">{inv.method}</TableCell>
-                <TableCell className="py-4">
+                <TableCell className="text-sm py-4 text-muted-foreground font-mono hidden sm:table-cell">{inv.method}</TableCell>
+                <TableCell className="py-4 hidden md:table-cell">
                   <div className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors w-fit">
                     <FileText className="w-3.5 h-3.5" />
                     <span className="font-mono">{inv.nf}</span>
@@ -84,6 +85,7 @@ export function PortalInvoicesPage() {
             ))}
           </TableBody>
         </Table>
+        </div>
       </div>
     </div>
   );

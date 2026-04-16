@@ -30,12 +30,12 @@ export function ActivitiesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Atividades</h1>
           <p className="text-sm font-mono text-muted-foreground mt-1">{pending.length} atividades pendentes</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" className="rounded-sm"><Filter className="w-3.5 h-3.5 mr-2" />Filtros</Button>
           <Button size="sm" className="rounded-sm"><Plus className="w-3.5 h-3.5 mr-2" />Nova Atividade</Button>
         </div>

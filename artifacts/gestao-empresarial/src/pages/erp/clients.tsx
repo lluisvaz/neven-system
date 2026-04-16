@@ -313,7 +313,7 @@ function BillingTab({ client }: { client: Client }) {
         {showNewSub && (
           <div className="border border-border rounded-sm bg-muted/20 p-4 mb-3 animate-in fade-in slide-in-from-top-2 duration-200 space-y-4">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Nova Assinatura para {client.name}</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground uppercase tracking-wider">Plano / Produto</Label>
                 <Select>
@@ -416,6 +416,7 @@ function BillingTab({ client }: { client: Client }) {
           <div className="border border-border rounded-sm p-6 text-center text-sm text-muted-foreground">Nenhuma fatura emitida</div>
         ) : (
           <div className="border border-border rounded-sm overflow-hidden">
+            <div className="overflow-x-auto no-scrollbar">
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow className="hover:bg-transparent">
@@ -442,6 +443,7 @@ function BillingTab({ client }: { client: Client }) {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </div>
         )}
       </div>
@@ -561,7 +563,7 @@ function ProposalsTab({ client }: { client: Client }) {
               {p.status}
             </Badge>
           </div>
-          <div className="grid grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
             <div>
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Valor</p>
               <p className="font-mono font-semibold">{fmt(p.value, client.currency, client.locale)}</p>
@@ -768,7 +770,7 @@ function NewClientSheet({ open, onClose }: { open: boolean; onClose: () => void 
 
         <div className="px-6 py-6 space-y-8">
           <Section title="Tipo de Conta">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {(["PJ", "PF"] as const).map(t => (
                 <button key={t} onClick={() => set("accountType", t)}
                   className={`p-3 border rounded-sm text-left transition-all ${form.accountType === t ? "border-foreground bg-foreground/5 font-semibold" : "border-border text-muted-foreground hover:border-muted-foreground/50"}`}>
@@ -1001,6 +1003,7 @@ export function ClientsPage() {
   const [selectedId, setSelectedId] = useState<number>(clients[0].id);
   const [activeTab, setActiveTab] = useState("Visão Geral");
   const [showNewClient, setShowNewClient] = useState(false);
+  const [mobileView, setMobileView] = useState<"list" | "detail">("list");
 
   const filtered = clients.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -1014,7 +1017,7 @@ export function ClientsPage() {
       <NewClientSheet open={showNewClient} onClose={() => setShowNewClient(false)} />
 
       <div className="space-y-5">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Clientes</h1>
             <p className="text-sm font-mono text-muted-foreground mt-1">
@@ -1023,13 +1026,13 @@ export function ClientsPage() {
               {clients.filter(c => c.contractStatus === "Vencendo").length} contrato vencendo
             </p>
           </div>
-          <Button size="sm" className="rounded-sm" onClick={() => setShowNewClient(true)}>
+          <Button size="sm" className="rounded-sm w-fit" onClick={() => setShowNewClient(true)}>
             <Plus className="w-3.5 h-3.5 mr-2" />Novo Cliente
           </Button>
         </div>
 
         <div className="flex gap-4 h-[calc(100vh-180px)] min-h-[500px]">
-          <div className="w-72 flex-shrink-0 flex flex-col gap-2">
+          <div className={`w-full md:w-72 md:flex-shrink-0 flex flex-col gap-2 ${mobileView === "detail" ? "hidden md:flex" : "flex"}`}>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Buscar cliente..." value={search} onChange={e => setSearch(e.target.value)}
@@ -1041,7 +1044,7 @@ export function ClientsPage() {
                 const isActive = c.id === selectedId;
                 const country = getCountry(c.country);
                 return (
-                  <button key={c.id} onClick={() => { setSelectedId(c.id); setActiveTab("Visão Geral"); }}
+                  <button key={c.id} onClick={() => { setSelectedId(c.id); setActiveTab("Visão Geral"); setMobileView("detail"); }}
                     className={`w-full text-left p-3 rounded-sm border transition-all ${isActive ? "border-foreground bg-foreground text-background" : "border-border hover:border-muted-foreground/40 hover:bg-muted/30"}`}>
                     <div className="flex items-center gap-2.5">
                       <Avatar className="w-7 h-7 rounded-sm flex-shrink-0">
@@ -1074,9 +1077,12 @@ export function ClientsPage() {
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col border border-border rounded-sm overflow-hidden min-w-0">
+          <div className={`flex-1 flex-col border border-border rounded-sm overflow-hidden min-w-0 ${mobileView === "list" ? "hidden md:flex" : "flex"}`}>
             <div className="flex-shrink-0 p-4 border-b border-border bg-muted/10 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <button onClick={() => setMobileView("list")} className="md:hidden flex-shrink-0 p-1 rounded-sm hover:bg-muted transition-colors" aria-label="Voltar">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
                 <Avatar className="w-10 h-10 rounded-sm flex-shrink-0">
                   <AvatarFallback className="rounded-sm bg-muted font-bold text-sm">{initials(selected.name)}</AvatarFallback>
                 </Avatar>

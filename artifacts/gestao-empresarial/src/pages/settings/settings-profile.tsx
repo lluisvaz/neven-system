@@ -33,7 +33,7 @@ export function SettingsProfilePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">Nome</Label>
                 <Input defaultValue="Maria" className="rounded-sm" />
@@ -71,7 +71,7 @@ export function SettingsProfilePage() {
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Senha atual</Label>
               <Input type="password" placeholder="••••••••" className="rounded-sm font-mono" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">Nova senha</Label>
                 <Input type="password" placeholder="••••••••" className="rounded-sm font-mono" />

@@ -68,20 +68,20 @@ export function ContactsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Leads</h1>
           <p className="text-sm font-mono text-muted-foreground mt-1">{leads.length} leads no pipeline</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" className="rounded-sm"><Upload className="w-3.5 h-3.5 mr-2" />Importar</Button>
           <Button variant="outline" size="sm" className="rounded-sm"><Download className="w-3.5 h-3.5 mr-2" />Exportar</Button>
           <Button size="sm" className="rounded-sm"><Plus className="w-3.5 h-3.5 mr-2" />Novo Lead</Button>
         </div>
       </div>
 
-      <div className="flex gap-3 items-center">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por nome, empresa ou e-mail..."
@@ -90,37 +90,40 @@ export function ContactsPage() {
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <Button variant="ghost" size="sm" className="text-muted-foreground"><Filter className="w-4 h-4 mr-2" />Filtros</Button>
-        <div className="flex items-center border border-border rounded-sm overflow-hidden ml-auto">
-          <button
-            onClick={() => setView("list")}
-            className={`flex items-center gap-1.5 px-3 h-8 text-xs transition-colors ${view === "list" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
-          >
-            <LayoutList className="w-3.5 h-3.5" />
-            Lista
-          </button>
-          <button
-            onClick={() => setView("kanban")}
-            className={`flex items-center gap-1.5 px-3 h-8 text-xs transition-colors ${view === "kanban" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
-          >
-            <Kanban className="w-3.5 h-3.5" />
-            Kanban
-          </button>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" className="text-muted-foreground"><Filter className="w-4 h-4 mr-2" />Filtros</Button>
+          <div className="flex items-center border border-border rounded-sm overflow-hidden">
+            <button
+              onClick={() => setView("list")}
+              className={`flex items-center gap-1.5 px-3 h-8 text-xs transition-colors ${view === "list" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+            >
+              <LayoutList className="w-3.5 h-3.5" />
+              Lista
+            </button>
+            <button
+              onClick={() => setView("kanban")}
+              className={`flex items-center gap-1.5 px-3 h-8 text-xs transition-colors ${view === "kanban" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+            >
+              <Kanban className="w-3.5 h-3.5" />
+              Kanban
+            </button>
+          </div>
         </div>
       </div>
 
       {view === "list" ? (
         <div className="border border-border rounded-sm overflow-hidden">
+          <div className="overflow-x-auto no-scrollbar">
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow className="hover:bg-transparent">
                 <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Lead</TableHead>
-                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Contato</TableHead>
-                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">País / Moeda</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden sm:table-cell">Contato</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden md:table-cell">País / Moeda</TableHead>
                 <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Etapa</TableHead>
-                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Valor</TableHead>
-                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Responsável</TableHead>
-                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Último Contato</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden sm:table-cell">Valor</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden lg:table-cell">Responsável</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right hidden md:table-cell">Último Contato</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -141,11 +144,11 @@ export function ContactsPage() {
                       </div>
                     </Link>
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="py-3 hidden sm:table-cell">
                     <div className="text-sm">{lead.email}</div>
                     <div className="text-xs font-mono text-muted-foreground mt-0.5">{lead.phone}</div>
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="py-3 hidden md:table-cell">
                     <div className="flex items-center gap-1.5 text-sm">
                       <span>{lead.countryCode}</span>
                       <span>{lead.country}</span>
@@ -157,13 +160,14 @@ export function ContactsPage() {
                       {lead.stage}
                     </Badge>
                   </TableCell>
-                  <TableCell className="py-3 font-mono text-sm">{lead.value}</TableCell>
-                  <TableCell className="py-3 text-sm text-muted-foreground">{lead.responsible}</TableCell>
-                  <TableCell className="py-3 text-sm font-mono text-right text-muted-foreground">{lead.lastContact}</TableCell>
+                  <TableCell className="py-3 font-mono text-sm hidden sm:table-cell">{lead.value}</TableCell>
+                  <TableCell className="py-3 text-sm text-muted-foreground hidden lg:table-cell">{lead.responsible}</TableCell>
+                  <TableCell className="py-3 text-sm font-mono text-right text-muted-foreground hidden md:table-cell">{lead.lastContact}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+          </div>
         </div>
       ) : (
         <div className="flex gap-5 overflow-x-auto pb-4 items-start min-h-[500px]">

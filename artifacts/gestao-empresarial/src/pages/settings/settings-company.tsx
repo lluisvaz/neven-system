@@ -80,7 +80,7 @@ export function SettingsCompanyPage() {
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Endereço Completo</Label>
               <Input defaultValue="Rua Augusta, 1500, Sala 301 - Consolação" className="rounded-sm" />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2 col-span-1">
                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">CEP</Label>
                 <Input defaultValue="01304-001" className="rounded-sm font-mono" />

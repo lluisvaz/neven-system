@@ -34,8 +34,8 @@ export function SettingsAuditPage() {
         <p className="text-sm font-mono text-muted-foreground mt-1">Registro de atividades para conformidade</p>
       </div>
 
-      <div className="flex gap-3 items-center">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Buscar por usuário, ação ou detalhe..." className="pl-9 rounded-sm border-muted-foreground/20 focus-visible:ring-accent" data-testid="input-search-audit" />
         </div>
@@ -55,41 +55,43 @@ export function SettingsAuditPage() {
       </div>
 
       <div className="border border-border rounded-sm overflow-hidden">
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-32">Data / Hora</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Usuário / IP</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Ação / Módulo</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Detalhes</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {auditLogs.map((log) => (
-              <TableRow key={log.id} className="hover:bg-muted/30 transition-colors">
-                <TableCell className="py-3">
-                  <div className="font-mono text-sm text-foreground">{log.date}</div>
-                  <div className="font-mono text-xs text-muted-foreground mt-0.5">{log.time}</div>
-                </TableCell>
-                <TableCell className="py-3">
-                  <div className="text-sm font-medium">{log.user}</div>
-                  <div className="text-xs font-mono text-muted-foreground mt-0.5">{log.ip}</div>
-                </TableCell>
-                <TableCell className="py-3">
-                  <div className="flex items-center gap-2">
-                    <Badge variant={actionBadge[log.action] || "outline"} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
-                      {log.action}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{log.module}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="py-3 text-sm text-muted-foreground max-w-md truncate">
-                  {log.detail}
-                </TableCell>
+        <div className="overflow-x-auto no-scrollbar">
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-32">Data / Hora</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Usuário / IP</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Ação / Módulo</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden md:table-cell">Detalhes</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {auditLogs.map((log) => (
+                <TableRow key={log.id} className="hover:bg-muted/30 transition-colors">
+                  <TableCell className="py-3">
+                    <div className="font-mono text-sm text-foreground">{log.date}</div>
+                    <div className="font-mono text-xs text-muted-foreground mt-0.5">{log.time}</div>
+                  </TableCell>
+                  <TableCell className="py-3">
+                    <div className="text-sm font-medium">{log.user}</div>
+                    <div className="text-xs font-mono text-muted-foreground mt-0.5">{log.ip}</div>
+                  </TableCell>
+                  <TableCell className="py-3">
+                    <div className="flex items-center gap-2">
+                      <Badge variant={actionBadge[log.action] || "outline"} className="rounded-sm font-mono text-[10px] uppercase tracking-wider px-2 py-0.5">
+                        {log.action}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">{log.module}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-3 text-sm text-muted-foreground max-w-md truncate hidden md:table-cell">
+                    {log.detail}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

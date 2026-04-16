@@ -76,7 +76,7 @@ export function ContactDetailPage() {
             </p>
           </div>
         </div>
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex flex-wrap gap-2">
           <Button variant="outline" size="sm" className="rounded-sm"><MessageSquare className="w-3.5 h-3.5 mr-2" />WhatsApp</Button>
           <Button variant="outline" size="sm" className="rounded-sm"><Mail className="w-3.5 h-3.5 mr-2" />E-mail</Button>
           <Button size="sm" className="rounded-sm"><Plus className="w-3.5 h-3.5 mr-2" />Nova Tarefa</Button>
@@ -196,6 +196,7 @@ export function ContactDetailPage() {
               <div className="flex justify-end mb-4">
                 <Button size="sm" variant="outline" className="rounded-sm"><Plus className="w-3.5 h-3.5 mr-2" />Nova Oportunidade</Button>
               </div>
+              <div className="overflow-x-auto no-scrollbar">
               <Table>
                 <TableHeader className="bg-muted/50">
                   <TableRow className="hover:bg-transparent">
@@ -218,12 +219,14 @@ export function ContactDetailPage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </TabsContent>
 
             <TabsContent value="tarefas" className="space-y-4 mt-0">
               <div className="flex justify-end mb-4">
                 <Button size="sm" variant="outline" className="rounded-sm"><Plus className="w-3.5 h-3.5 mr-2" />Nova Tarefa</Button>
               </div>
+              <div className="overflow-x-auto no-scrollbar">
               <Table>
                 <TableHeader className="bg-muted/50">
                   <TableRow className="hover:bg-transparent">
@@ -248,12 +251,14 @@ export function ContactDetailPage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </TabsContent>
 
             <TabsContent value="cobranças" className="space-y-4 mt-0">
               <div className="flex justify-end mb-4">
                 <Button size="sm" variant="outline" className="rounded-sm"><DollarSign className="w-3.5 h-3.5 mr-2" />Nova Fatura</Button>
               </div>
+              <div className="overflow-x-auto no-scrollbar">
               <Table>
                 <TableHeader className="bg-muted/50">
                   <TableRow className="hover:bg-transparent">
@@ -278,6 +283,7 @@ export function ContactDetailPage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </TabsContent>
           </Tabs>
         </div>

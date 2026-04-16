@@ -114,7 +114,7 @@ export function NewChargePage() {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-border grid grid-cols-2 gap-4">
+          <div className="pt-6 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Vencimento</Label>
               <Input type="date" className="rounded-sm font-mono" defaultValue="2026-04-30" />

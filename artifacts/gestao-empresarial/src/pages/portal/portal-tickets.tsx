@@ -26,12 +26,12 @@ export function PortalTicketsPage() {
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Meus Chamados</h1>
           <p className="text-sm font-mono text-muted-foreground mt-1">Acompanhe e abra solicitações de suporte</p>
         </div>
-        <Button size="sm" onClick={() => setShowForm(!showForm)} className="rounded-sm" disabled={showForm}>
+        <Button size="sm" onClick={() => setShowForm(!showForm)} className="rounded-sm w-fit" disabled={showForm}>
           <Plus className="w-3.5 h-3.5 mr-2" />
           Novo Chamado
         </Button>
@@ -52,7 +52,7 @@ export function PortalTicketsPage() {
               <Input placeholder="Descreva brevemente o problema ou necessidade" className="rounded-sm" data-testid="input-ticket-subject" />
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">Categoria</Label>
                 <Select defaultValue="question">
@@ -104,13 +104,14 @@ export function PortalTicketsPage() {
       )}
 
       <div className="border border-border rounded-sm overflow-hidden bg-card">
+        <div className="overflow-x-auto no-scrollbar">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-24">ID</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-24 hidden sm:table-cell">ID</TableHead>
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Assunto</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Categoria / Prioridade</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Abertura / Última Info</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden md:table-cell">Categoria / Prioridade</TableHead>
+              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden md:table-cell">Abertura / Última Info</TableHead>
               <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-center">Status</TableHead>
               <TableHead className="w-12" />
             </TableRow>
@@ -121,17 +122,17 @@ export function PortalTicketsPage() {
                 key={t.id}
                 className={`hover:bg-muted/30 transition-colors group cursor-pointer ${["Resolvido", "Fechado"].includes(t.status) ? "opacity-70" : ""}`}
               >
-                <TableCell className="font-mono text-sm py-4 text-muted-foreground">{t.id}</TableCell>
+                <TableCell className="font-mono text-sm py-4 text-muted-foreground hidden sm:table-cell">{t.id}</TableCell>
                 <TableCell className="py-4">
                   <div className="text-sm font-medium group-hover:text-accent transition-colors">{t.title}</div>
                 </TableCell>
-                <TableCell className="py-4">
+                <TableCell className="py-4 hidden md:table-cell">
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-sm">{t.category}</span>
                     <span className="text-[10px] uppercase font-mono tracking-wider text-muted-foreground">{t.priority}</span>
                   </div>
                 </TableCell>
-                <TableCell className="py-4">
+                <TableCell className="py-4 hidden md:table-cell">
                   <div className="flex flex-col gap-0.5">
                     <span className="text-sm font-mono text-foreground">{t.created}</span>
                     <span className="text-xs font-mono text-muted-foreground">{t.updated}</span>
@@ -151,6 +152,7 @@ export function PortalTicketsPage() {
             ))}
           </TableBody>
         </Table>
+        </div>
       </div>
     </div>
   );

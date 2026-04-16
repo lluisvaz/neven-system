@@ -706,7 +706,7 @@ export function CommunicationsPage() {
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-start justify-between flex-shrink-0">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between flex-shrink-0">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight">Comunicações</h1>
@@ -714,7 +714,7 @@ export function CommunicationsPage() {
           </div>
           <p className="text-sm font-mono text-muted-foreground mt-1">Caixa de entrada unificada — WhatsApp, E-mail</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" className="rounded-sm text-xs gap-1.5" onClick={() => setChannelManagerOpen(true)}>
             <Settings className="w-3.5 h-3.5" /> Canais
             <span className="flex items-center gap-1 ml-1">{whatsappInstances.map(inst => <StatusDot key={inst.id} status={inst.status} />)}</span>

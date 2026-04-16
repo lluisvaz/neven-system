@@ -36,7 +36,7 @@ export function SubscriptionsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Assinaturas</h1>
           <p className="text-sm font-mono text-muted-foreground mt-1">Receita recorrente · Stripe + Asaas</p>
@@ -66,8 +66,8 @@ export function SubscriptionsPage() {
         </div>
       </div>
 
-      <div className="flex gap-3 items-center">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Buscar cliente, plano..." className="pl-9 rounded-sm border-muted-foreground/20 focus-visible:ring-accent" />
         </div>
@@ -75,55 +75,57 @@ export function SubscriptionsPage() {
       </div>
 
       <div className="border border-border rounded-sm overflow-hidden">
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Cliente / Plano</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Gateway · Pagamento</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Valor</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Próx. Cobrança</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Status</TableHead>
-              <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {subscriptions.map((s, i) => {
-              const Icon = statusConfig[s.status].icon;
-              return (
-                <TableRow key={i} className={`hover:bg-muted/30 transition-colors ${s.status === "Cancelada" ? "opacity-60" : ""}`}>
-                  <TableCell className="py-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm">{s.country}</span>
-                      <div>
-                        <div className="font-medium text-sm">{s.client}</div>
-                        <div className="text-xs text-muted-foreground">{s.plan} · {s.frequency}</div>
+        <div className="overflow-x-auto no-scrollbar">
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Cliente / Plano</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden md:table-cell">Gateway · Pagamento</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-right">Valor</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 hidden sm:table-cell">Próx. Cobrança</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10">Status</TableHead>
+                <TableHead className="font-medium text-xs uppercase tracking-wider h-10 w-12"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {subscriptions.map((s, i) => {
+                const Icon = statusConfig[s.status].icon;
+                return (
+                  <TableRow key={i} className={`hover:bg-muted/30 transition-colors ${s.status === "Cancelada" ? "opacity-60" : ""}`}>
+                    <TableCell className="py-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm">{s.country}</span>
+                        <div>
+                          <div className="font-medium text-sm">{s.client}</div>
+                          <div className="text-xs text-muted-foreground">{s.plan} · {s.frequency}</div>
+                        </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-3">
-                    <div className="flex items-center gap-2">
-                      <GatewayPill gateway={s.gateway} />
-                      <span className="text-xs text-muted-foreground">{s.method}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-3 text-right font-mono font-medium text-sm">{s.value}</TableCell>
-                  <TableCell className="py-3 font-mono text-sm text-muted-foreground">{s.nextBilling}</TableCell>
-                  <TableCell className="py-3">
-                    <div className="flex items-center gap-1.5">
-                      <Icon className={`w-3.5 h-3.5 ${statusConfig[s.status].colorClass}`} />
-                      <span className="text-xs font-medium">{s.status}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-3 text-right">
-                    <Button variant="ghost" size="icon" className="w-8 h-8 rounded-sm">
-                      <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                    </TableCell>
+                    <TableCell className="py-3 hidden md:table-cell">
+                      <div className="flex items-center gap-2">
+                        <GatewayPill gateway={s.gateway} />
+                        <span className="text-xs text-muted-foreground">{s.method}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-3 text-right font-mono font-medium text-sm">{s.value}</TableCell>
+                    <TableCell className="py-3 font-mono text-sm text-muted-foreground hidden sm:table-cell">{s.nextBilling}</TableCell>
+                    <TableCell className="py-3">
+                      <div className="flex items-center gap-1.5">
+                        <Icon className={`w-3.5 h-3.5 ${statusConfig[s.status].colorClass}`} />
+                        <span className="text-xs font-medium">{s.status}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-3 text-right">
+                      <Button variant="ghost" size="icon" className="w-8 h-8 rounded-sm">
+                        <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
