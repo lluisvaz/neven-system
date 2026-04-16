@@ -7,11 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  BriefcaseBusiness, Building2, CheckCircle2,
+  BriefcaseBusiness, Building2, CalendarDays, CheckCircle2,
   CircleDollarSign, Plus, RefreshCw, Save, Trash2,
   TrendingUp, Users, Wallet, AlertCircle, Zap,
 } from "lucide-react";
-import { useFinancialData, fmtBRL } from "@/lib/financial-data";
+import { useFinancialData, fmtBRL, getRecentMonths, fmtMonth } from "@/lib/financial-data";
 
 const GW = {
   stripe: { label: "Stripe", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/30", border: "border-violet-200 dark:border-violet-800/50" },
@@ -39,8 +39,12 @@ const initialExpenses: Expense[] = [
 const storageKey = "gestorpro-financial-distribution-v2";
 const clampPercent = (v: number) => Math.max(0, Math.min(100, Math.round(v)));
 
+const RECENT_MONTHS = getRecentMonths(12);
+
 export function DistributionPage() {
-  const { data: fin, loading, error, refresh } = useFinancialData();
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const { data: fin, loading, error, refresh } = useFinancialData(selectedMonth);
 
   const [monthlyRevenue, setMonthlyRevenue] = useState(220000);
   const [useGatewayBalance, setUseGatewayBalance] = useState(true);
@@ -51,9 +55,11 @@ export function DistributionPage() {
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
   const [savedAt, setSavedAt] = useState("Ainda não salvo");
 
+  // Sync monthly revenue from gateway data whenever month or data changes
   useEffect(() => {
     if (fin && useGatewayBalance) {
-      setMonthlyRevenue(Math.round(fin.totalBalanceBRL));
+      const received = fin.receivedThisMonthBRL;
+      if (received > 0) setMonthlyRevenue(Math.round(received));
     }
   }, [fin, useGatewayBalance]);
 
@@ -142,7 +148,23 @@ export function DistributionPage() {
             Configure quanto entra no caixa da empresa, quanto vai para sócios e quanto fica reservado para despesas.
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+          {/* Month filter */}
+          <div className="flex items-center gap-1.5 border border-border rounded-sm px-2.5 h-9 bg-background">
+            <CalendarDays className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+            <select
+              value={selectedMonth}
+              onChange={e => {
+                setSelectedMonth(e.target.value);
+                if (useGatewayBalance) setMonthlyRevenue(0);
+              }}
+              className="text-xs font-mono bg-transparent border-none outline-none text-foreground cursor-pointer"
+            >
+              {RECENT_MONTHS.map(m => (
+                <option key={m} value={m}>{fmtMonth(m)}</option>
+              ))}
+            </select>
+          </div>
           <Badge variant={totals.allocatedPercent === 100 ? "secondary" : totals.allocatedPercent > 100 ? "destructive" : "outline"} className="rounded-sm justify-center">
             {status}: {totals.allocatedPercent}%
           </Badge>
@@ -152,22 +174,25 @@ export function DistributionPage() {
         </div>
       </header>
 
-      {/* ── GATEWAY BALANCE PANEL ─────────────────────────────────────── */}
+      {/* ── GATEWAY MONTHLY RECEIPTS PANEL ────────────────────────────── */}
       <div className="border border-border rounded-sm overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 bg-muted/20 border-b border-border">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-muted-foreground" />
             <span className="text-xs uppercase tracking-widest font-semibold text-muted-foreground">
-              Saldo dos Gateways — Receita Base
+              Recebido em {fmtMonth(selectedMonth)} — Stripe + Asaas
             </span>
+            {!fin?.isLiveData && (
+              <span className="text-[10px] text-amber-500 font-mono">[simulado]</span>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
               <input type="checkbox" checked={useGatewayBalance} onChange={e => {
                 setUseGatewayBalance(e.target.checked);
-                if (e.target.checked && fin) setMonthlyRevenue(Math.round(fin.totalBalanceBRL));
+                if (e.target.checked && fin) setMonthlyRevenue(Math.round(fin.receivedThisMonthBRL));
               }} className="rounded" />
-              Usar saldo real como base
+              Usar como receita base
             </label>
             <Button variant="ghost" size="icon" className="w-7 h-7 rounded-sm" onClick={refresh} disabled={loading}>
               <RefreshCw className={`w-3.5 h-3.5 text-muted-foreground ${loading ? "animate-spin" : ""}`} />
@@ -178,7 +203,7 @@ export function DistributionPage() {
         {error && (
           <div className="flex items-center gap-2 px-4 py-3 text-sm text-destructive bg-destructive/5">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>Erro ao carregar saldo: {error}. Usando valor manual.</span>
+            <span>Erro ao carregar dados: {error}. Usando valor manual.</span>
           </div>
         )}
 
@@ -189,7 +214,10 @@ export function DistributionPage() {
               <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border ${GW.asaas.color} ${GW.asaas.bg} ${GW.asaas.border}`}>Asaas</span>
             </div>
             <p className={`text-2xl font-mono font-semibold ${loading ? "opacity-40" : ""}`}>
-              {fmtBRL(fin?.asaas.balanceBRL ?? 0)}
+              {fmtBRL(fin?.asaas.receivedThisMonthBRL ?? 0)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Saldo acumulado: {fmtBRL(fin?.asaas.balanceBRL ?? 0)}
             </p>
           </div>
 
@@ -199,17 +227,23 @@ export function DistributionPage() {
               <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border ${GW.stripe.color} ${GW.stripe.bg} ${GW.stripe.border}`}>Stripe</span>
             </div>
             <p className={`text-2xl font-mono font-semibold ${loading ? "opacity-40" : ""}`}>
-              {fmtBRL(fin?.stripe.availableBRL ?? 0)}
+              {fmtBRL(fin?.stripe.receivedThisMonthBRL ?? 0)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Disponível: {fmtBRL(fin?.stripe.availableBRL ?? 0)}
             </p>
           </div>
 
-          {/* Total */}
+          {/* Total received this month */}
           <div className="p-4 bg-muted/10">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border border-border bg-background text-foreground">TOTAL</span>
+              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border border-border bg-background text-foreground">TOTAL DO MÊS</span>
             </div>
             <p className={`text-2xl font-mono font-semibold ${loading ? "opacity-40" : ""} text-foreground`}>
-              {fmtBRL(fin?.totalBalanceBRL ?? 0)}
+              {fmtBRL(fin?.receivedThisMonthBRL ?? 0)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Base usada na distribuição
             </p>
           </div>
         </div>
@@ -239,8 +273,8 @@ export function DistributionPage() {
             />
             <p className="text-xs text-muted-foreground mt-2">
               {useGatewayBalance
-                ? "Alimentado pelo saldo da sua conta Stripe + Asaas."
-                : "Valor manual. Marque 'Usar saldo real' para sincronizar."}
+                ? `Entradas de ${fmtMonth(selectedMonth)} via Stripe + Asaas.`
+                : "Valor manual. Marque 'Usar como receita base' para sincronizar."}
             </p>
           </CardContent>
         </Card>

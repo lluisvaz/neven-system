@@ -25,10 +25,10 @@ const topDefaulters = [
   { client: "StarUp Labs", value: 3200, days: 12, gateway: "asaas" as const },
 ];
 
-const gatewayBreakdown = [
-  { gateway: "asaas" as const, clients: 71, mrrBRL: 131000, share: 84, methods: "PIX, Boleto, Cartão" },
-  { gateway: "stripe" as const, clients: 16, mrrBRL: 25000, share: 16, methods: "Card, Wire, ACH" },
-];
+const GATEWAY_STATIC = {
+  asaas:  { clients: 71, methods: "PIX, Boleto, Cartão" },
+  stripe: { clients: 16, methods: "Card, Wire, ACH" },
+};
 
 function GatewayPill({ gateway }: { gateway: "stripe" | "asaas" }) {
   const m = GATEWAY_META[gateway];
@@ -46,6 +46,9 @@ export function BillingDashboardPage() {
   const arr = fin?.arrBRL ?? 156000 * 12;
   const delinquency = fin?.delinquencyRate ?? 4.8;
   const subscriptions = fin?.activeSubscriptions ?? 87;
+  const asaasMonthly = fin?.asaas.receivedThisMonthBRL ?? 131000;
+  const stripeMonthly = fin?.stripe.receivedThisMonthBRL ?? 25000;
+  const totalMonthly = fin?.receivedThisMonthBRL ?? 156000;
 
   return (
     <div className="space-y-10">
@@ -77,26 +80,29 @@ export function BillingDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {gatewayBreakdown.map(gw => {
-          const m = GATEWAY_META[gw.gateway];
+        {(["asaas", "stripe"] as const).map(gw => {
+          const m = GATEWAY_META[gw];
+          const received = gw === "asaas" ? asaasMonthly : stripeMonthly;
+          const share = totalMonthly > 0 ? Math.round((received / totalMonthly) * 100) : (gw === "asaas" ? 84 : 16);
+          const stat = GATEWAY_STATIC[gw];
           return (
-            <div key={gw.gateway} className={`p-4 border rounded-sm ${m.borderColor} ${m.bgColor}`}>
+            <div key={gw} className={`p-4 border rounded-sm ${m.borderColor} ${m.bgColor}`}>
               <div className="flex items-center justify-between mb-3">
-                <GatewayPill gateway={gw.gateway} />
-                <span className={`text-xs font-mono font-semibold ${m.color}`}>{gw.share}% do MRR</span>
+                <GatewayPill gateway={gw} />
+                <span className={`text-xs font-mono font-semibold ${m.color}`}>{share}% do mês</span>
               </div>
               <div className="grid grid-cols-3 gap-2 text-sm">
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Clientes</p>
-                  <p className={`font-mono font-semibold ${m.color}`}>{gw.clients}</p>
+                  <p className={`font-mono font-semibold ${m.color}`}>{stat.clients}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">MRR (BRL)</p>
-                  <p className={`font-mono font-semibold ${m.color}`}>{fmtBRLCompact(gw.mrrBRL)}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Recebido</p>
+                  <p className={`font-mono font-semibold ${m.color} ${loading ? "opacity-40" : ""}`}>{fmtBRLCompact(received)}</p>
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Métodos</p>
-                  <p className="text-[10px] text-muted-foreground leading-tight">{gw.methods}</p>
+                  <p className="text-[10px] text-muted-foreground leading-tight">{stat.methods}</p>
                 </div>
               </div>
             </div>

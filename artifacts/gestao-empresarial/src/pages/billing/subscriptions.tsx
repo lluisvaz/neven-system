@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, MoreHorizontal, CheckCircle2, PauseCircle, XCircle } from "lucide-react";
 import { GATEWAY_META, type Gateway } from "@/lib/client-config";
+import { useFinancialData, fmtBRL, fmtBRLCompact } from "@/lib/financial-data";
 
 const subscriptions = [
   { client: "Tech Solutions Ltda", plan: "Enterprise", value: "R$ 12.000", currency: "BRL", frequency: "Mensal", nextBilling: "01/05/2026", status: "Ativa", method: "Cartão •••• 4242", gateway: "asaas" as Gateway, country: "🇧🇷" },
@@ -32,36 +33,43 @@ function GatewayPill({ gateway }: { gateway: Gateway }) {
 }
 
 export function SubscriptionsPage() {
+  const { data: fin, loading } = useFinancialData();
   const active = subscriptions.filter(s => s.status === "Ativa");
+  const mrr = fin?.mrrBRL ?? 156000;
+  const asaasMonthly = fin?.asaas.receivedThisMonthBRL ?? 131000;
+  const stripeMonthly = fin?.stripe.receivedThisMonthBRL ?? 25000;
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Assinaturas</h1>
-          <p className="text-sm font-mono text-muted-foreground mt-1">Receita recorrente · Stripe + Asaas</p>
+          <p className="text-sm font-mono text-muted-foreground mt-1">
+            Receita recorrente · Stripe + Asaas
+            {!fin?.isLiveData && <span className="ml-2 text-amber-500 text-[10px]">[dados simulados]</span>}
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-4 border-y border-border">
         <div className="flex flex-col space-y-1">
           <span className="text-xs uppercase tracking-wider font-medium text-muted-foreground">Ativas</span>
-          <span className="text-2xl font-mono">{active.length}</span>
+          <span className="text-2xl font-mono">{fin?.activeSubscriptions ?? active.length}</span>
         </div>
         <div className="flex flex-col space-y-1">
           <span className="text-xs uppercase tracking-wider font-medium text-muted-foreground">MRR Total</span>
-          <span className="text-2xl font-mono">R$ 58.200</span>
+          <span className={`text-2xl font-mono ${loading ? "opacity-40" : ""}`}>{fmtBRLCompact(mrr)}</span>
         </div>
         <div className="flex flex-col space-y-1">
           <span className="text-xs uppercase tracking-wider font-medium text-muted-foreground">via Asaas</span>
-          <span className={`text-2xl font-mono ${GATEWAY_META.asaas.color}`}>
-            {subscriptions.filter(s => s.gateway === "asaas" && s.status === "Ativa").length}
+          <span className={`text-2xl font-mono ${GATEWAY_META.asaas.color} ${loading ? "opacity-40" : ""}`}>
+            {fmtBRLCompact(asaasMonthly)}
           </span>
         </div>
         <div className="flex flex-col space-y-1">
           <span className="text-xs uppercase tracking-wider font-medium text-muted-foreground">via Stripe</span>
-          <span className={`text-2xl font-mono ${GATEWAY_META.stripe.color}`}>
-            {subscriptions.filter(s => s.gateway === "stripe" && s.status === "Ativa").length}
+          <span className={`text-2xl font-mono ${GATEWAY_META.stripe.color} ${loading ? "opacity-40" : ""}`}>
+            {fmtBRLCompact(stripeMonthly)}
           </span>
         </div>
       </div>

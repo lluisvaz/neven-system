@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useFinancialData, fmtBRLCompact } from "@/lib/financial-data";
 import {
   AlertTriangle,
   Banknote,
@@ -102,6 +103,29 @@ const operationalAlerts = [
 const formatCurrency = (value: number) => `R$ ${(value / 1000).toLocaleString("pt-BR")}k`;
 
 export function Dashboard() {
+  const { data: fin, loading } = useFinancialData();
+
+  const mrr = fin?.mrrBRL;
+  const arr = fin?.arrBRL;
+  const delinquency = fin?.delinquencyRate;
+  const totalBalance = fin?.totalBalanceBRL;
+
+  function dynKpis() {
+    return kpis.map(k => {
+      if (k.title === "MRR" && mrr != null) return { ...k, value: fmtBRLCompact(mrr) };
+      if (k.title === "ARR" && arr != null) return { ...k, value: fmtBRLCompact(arr) };
+      if (k.title === "Inadimplência" && delinquency != null) return { ...k, value: `${delinquency}%` };
+      if (k.title === "Runway" && totalBalance != null && mrr != null && mrr > 0) {
+        const months = Math.round(totalBalance / mrr);
+        return { ...k, value: `${months} meses` };
+      }
+      return k;
+    });
+  }
+
+  const now = new Date();
+  const updatedAt = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -113,14 +137,14 @@ export function Dashboard() {
         </div>
         <div className="grid grid-cols-2 sm:flex gap-2 text-xs font-mono">
           <Badge variant="secondary" className="rounded-sm justify-center">Meta mês: 82%</Badge>
-          <Badge variant="secondary" className="rounded-sm justify-center">Burn: R$ 94 mil</Badge>
+          {mrr != null && <Badge variant="secondary" className={`rounded-sm justify-center ${loading ? "opacity-40" : ""}`}>MRR: {fmtBRLCompact(mrr)}</Badge>}
           <Badge variant="secondary" className="rounded-sm justify-center">Forecast: R$ 211 mil</Badge>
-          <Badge variant="secondary" className="rounded-sm justify-center">Atualizado 09:42</Badge>
+          <Badge variant="secondary" className="rounded-sm justify-center">Atualizado {updatedAt}</Badge>
         </div>
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6 gap-3">
-        {kpis.map((kpi) => (
+        {dynKpis().map((kpi) => (
           <Card key={kpi.title} className="rounded-sm">
             <CardContent className="p-4">
               <div className="flex items-start justify-between gap-3">
@@ -129,7 +153,7 @@ export function Dashboard() {
                     <kpi.icon className="w-4 h-4" />
                     <span className="text-[10px] uppercase tracking-wider font-medium">{kpi.title}</span>
                   </div>
-                  <div className="text-2xl font-mono tracking-tight">{kpi.value}</div>
+                  <div className={`text-2xl font-mono tracking-tight ${loading && ["MRR", "ARR", "Inadimplência", "Runway"].includes(kpi.title) ? "opacity-40" : ""}`}>{kpi.value}</div>
                 </div>
                 <span className={`text-xs font-mono ${kpi.tone === "warning" ? "text-destructive" : "text-accent"}`}>
                   {kpi.trend}
